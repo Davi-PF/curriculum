@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest"
+    "test": "npx jest"
   },
   "dependencies": {
     "next": "16.1.1",

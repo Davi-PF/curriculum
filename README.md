@@ -43,8 +43,8 @@ npm run test -- --coverage
 
 This project uses GitHub Actions for continuous integration and deployment. The workflow includes:
 
-- **Testing**: Runs on Node.js 18.x and 20.x, includes linting and test coverage
-- **SonarCloud**: Code quality analysis on `master` and `dev` branches
+- **Testing**: Runs tests and collects coverage on Windows with Node.js v22.11.0
+- **SonarQube**: Code quality analysis on `main` and `dev` branches
 - **Codecov**: Coverage reporting
 
 ### Required Secrets
@@ -52,6 +52,8 @@ This project uses GitHub Actions for continuous integration and deployment. The 
 For the CI/CD to work, set these secrets in your GitHub repository:
 
 - `SONAR_TOKEN`: Your SonarCloud token
+- `SONAR_PROJECT_KEY`: Your SonarCloud project key
+- `SONAR_ORGANIZATION_KEY`: Your SonarCloud organization key
 - `CODECOV_TOKEN`: Your Codecov token
 
 ## Customization
