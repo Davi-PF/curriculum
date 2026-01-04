@@ -20,9 +20,41 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Project Structure
 
-- `app/` - Next.js app directory with pages and layout
+- `src/app/` - Next.js app directory with pages and layout
+- `src/components/` - Reusable React components
+- `src/__tests__/` - Test files
 - `public/` - Static assets
-- `components/` - Reusable React components (if added)
+
+## Testing
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Run tests with coverage:
+
+```bash
+npm run test -- --coverage
+```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment. The workflow includes:
+
+- **Testing**: Runs tests and collects coverage on Windows with Node.js v22.11.0
+- **SonarQube**: Code quality analysis on `main` and `dev` branches
+- **Codecov**: Coverage reporting
+
+### Required Secrets
+
+For the CI/CD to work, set these secrets in your GitHub repository:
+
+- `SONAR_TOKEN`: Your SonarCloud token
+- `SONAR_PROJECT_KEY`: Your SonarCloud project key
+- `SONAR_ORGANIZATION_KEY`: Your SonarCloud organization key
+- `CODECOV_TOKEN`: Your Codecov token
 
 ## Customization
 
