@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "src/components/ThemeSelector/hooks/themeSelectorHook.tsx", "src/types/skill.ts"  ],
   "exclude": ["node_modules"]
 }
