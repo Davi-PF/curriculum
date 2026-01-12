@@ -21,6 +21,8 @@ export interface Translations {
   };
   skill: {
     title: string;
+    hardSkills: string;
+    softSkills: string;
     description: string;
   };
   about: {
@@ -31,11 +33,18 @@ export interface Translations {
     title: string;
     description: string;
     accessHere: string;
+    ariaLabelCopyEmail: string;
+    ariaLabelCopyPhone: string;
     Phone: string;
     Email: string;
     LinkedIn: string;
     GitHub: string;
+    curriculumText: string;
   };
+  formation: {
+    title: string;
+    description: string;
+  }
   footer: {
     rights: string;
   };

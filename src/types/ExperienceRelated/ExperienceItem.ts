@@ -1,3 +1,5 @@
+import { Activity } from "./Activity";
+
 // src/types/experience.ts
 export interface ExperienceItem {
   id: string;
@@ -7,5 +9,6 @@ export interface ExperienceItem {
 
   title: string;
   description: string;
-  activities: string[];
+  extraActivities?: string;
+  activities: Activity[];
 }
