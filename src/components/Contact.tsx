@@ -1,17 +1,41 @@
 "use client";
 
+import { useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import Image from "next/image";
+
+const toastConfig = {
+  email: {
+    text: 'Email copiado',
+    className: 'text-emerald-300 ring-emerald-400/30',
+  },
+  phone: {
+    text: 'Telefone copiado',
+    className: 'text-sky-300 ring-sky-400/30',
+  },
+  error: {
+    text: 'Não foi possível copiar',
+    className: 'text-rose-300 ring-rose-400/30',
+  },
+} as const;
+
 
 export default function Contact() {
   const { t } = useLanguage();
 
-  const copyToClipboard = async (value: string) => {
+  type CopiedType = "email" | "phone" | "error" | null;
+
+  const [copiedField, setCopiedField] = useState<CopiedType>(null);
+
+  const copyToClipboard = async (value: string, field: CopiedType) => {
     try {
       await navigator.clipboard.writeText(value);
-      alert("Copiado para a área de transferência");
+      setCopiedField(field);
+
+      setTimeout(() => setCopiedField(null), 2000);
     } catch {
-      alert("Não foi possível copiar");
+      setCopiedField("error");
+      setTimeout(() => setCopiedField(null), 2000);
     }
   };
 
@@ -30,7 +54,7 @@ export default function Contact() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <button
               type="button"
-              onClick={() => copyToClipboard("daviprufer@gmail.com")}
+              onClick={() => copyToClipboard("daviprufer@gmail.com", "email")}
               className="
     flex items-center gap-2
     text-emerald-400
@@ -54,8 +78,6 @@ export default function Contact() {
               <span>
                 <strong>{t.contact.Email}</strong> daviprufer@gmail.com
               </span>
-
-              
             </button>
             <span className="text-emerald-300">📋</span>
           </div>
@@ -63,7 +85,7 @@ export default function Contact() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <button
               type="button"
-              onClick={() => copyToClipboard("47999585464")}
+              onClick={() => copyToClipboard("47999585464", "phone")}
               className="
     flex items-center gap-2
     text-emerald-400
@@ -87,8 +109,6 @@ export default function Contact() {
               <span>
                 <strong>{t.contact.Phone}</strong> (47) 99958-5464
               </span>
-
-              
             </button>
             <span className="text-emerald-300">📋</span>
           </div>
@@ -147,6 +167,24 @@ export default function Contact() {
           </div>
         </div>
       </div>
+      {copiedField && (
+  <div
+    className={`
+      fixed bottom-6 left-1/2 -translate-x-1/2
+      bg-stone-900/80 backdrop-blur-md
+      inset-ring-1
+      px-4 py-2
+      rounded-full shadow-lg
+      text-sm font-medium
+      transition-all duration-300
+      animate-fade-in
+      ${toastConfig[copiedField].className}
+    `}
+  >
+    {toastConfig[copiedField].text}
+  </div>
+)}
+
     </section>
   );
 }

@@ -27,45 +27,75 @@ export default function Header() {
         ${isScrolled ? "py-0.05" : "py-2"}
       `}
     >
-      <nav className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-3 items-center transition-all duration-300">
+      <nav className="container mx-auto px-4 py-4">
+        <div
+          className="
+  relative
+  grid
+  grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
+  items-center
+"
+        >
           {/* Esquerda */}
           <div
-            className={`
-          justify-self-start inline-block 
-          bg-transparent inset-ring-1 inset-ring-stone-600 
-          px-5 md:px-9 py-2 rounded-full shadow-lg 
-          relative 
-          hover:bg-stone-800/90 transition-color
-          transition-all duration-300
-      ${isScrolled ? "px-4 py-1" : "px-5 md:px-9 py-2"}`}
-          >
+  className={`
+    justify-self-start
+    bg-stone-800/50 backdrop-blur-md
+    inset-ring-1 inset-ring-stone-600/40
+    rounded-xl sm:rounded-full
+    shadow-sm
+    max-w-full
+    transition-all duration-300
+    ${
+      isScrolled
+        ? "px-3 py-1"
+        : "px-3 py-1.5 sm:px-4 sm:py-2"
+    }
+  `}
+>
+
             <h1
-              className={`text-center md:text-justify font-bold text-emerald-300 ${
-                isScrolled ? "text-lg md:text-2xl" : "text-xl md:text-3xl"
-              }`}
-            >
+  className={`
+    font-bold text-emerald-300
+    leading-tight
+    transition-all duration-300
+    ${
+      isScrolled
+        ? "text-sm sm:text-lg md:text-xl"
+        : "text-sm sm:text-xl md:text-3xl"
+    }
+  `}
+>
+
               {t.header.title}
             </h1>
           </div>
 
           {/* Centro */}
-          <div className="justify-self-center">
+          <div
+            className="justify-self-center
+  px-2
+  sm:static sm:translate-x-0 sm:px-0
+"
+          >
             <LanguageSwitcher />
           </div>
 
           {/* Direita */}
-          <div className="justify-self-end inline-block">
+          <div className="justify-self-end">
             <div
-              className={`
-            relative w-30 h-20 
-            md:w-24 md:h-16 rounded-full overflow-hidden inset-ring-1 inset-ring-emerald-500 shadow-lg
-            ${
-              isScrolled
-                ? "w-16 h-12 md:w-20 md:h-14"
-                : "w-20 h-16 md:w-24 md:h-16"
-            }`}
-            >
+  className={`
+    relative rounded-full overflow-hidden
+    inset-ring-1 inset-ring-emerald-500 shadow-lg
+    transition-all duration-300
+    ${
+      isScrolled
+        ? "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16"
+        : "w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20"
+    }
+  `}
+>
+
               <Image
                 src="/images/profile.jpg"
                 alt="Foto de perfil"

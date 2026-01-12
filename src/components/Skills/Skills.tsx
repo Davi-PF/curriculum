@@ -48,14 +48,24 @@ export default function Skills() {
             </div>
           </div>
 
-          <div className="flex flex-wrap flex-grow gap-2 bg-stone-600/30 backdrop-blur-md inset-ring-1 inset-ring-stone-700/40 p-4 sm:p-6 rounded-b-lg shadow-lg relative">
-            {hardSkills.map((skill) => (
-              <SkillButton
-                key={skill.id}
-                skill={skill}
-                onClick={handleSkillClick}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div
+              className="
+          flex flex-wrap justify-center
+          max-w-4xl
+          gap-2 bg-stone-600/30 backdrop-blur-md 
+          inset-ring-1 inset-ring-stone-700/40 
+          p-4 sm:p-6 
+          rounded-b-lg shadow-lg "
+            >
+              {hardSkills.map((skill) => (
+                <SkillButton
+                  key={skill.id}
+                  skill={skill}
+                  onClick={handleSkillClick}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -67,14 +77,24 @@ export default function Skills() {
               </h3>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 bg-stone-600/30 backdrop-blur-md inset-ring-1 inset-ring-stone-700/40 p-4 sm:p-6 rounded-b-lg shadow-lg relative">
-            {softSkills.map((skill) => (
-              <SkillButton
-                key={skill.id}
-                skill={skill}
-                onClick={handleSkillClick}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div
+              className="
+          flex flex-wrap justify-center
+          max-w-4xl
+          gap-2 bg-stone-600/30 backdrop-blur-md 
+          inset-ring-1 inset-ring-stone-700/40 
+          p-4 sm:p-6 
+          rounded-b-lg shadow-lg "
+            >
+              {softSkills.map((skill) => (
+                <SkillButton
+                  key={skill.id}
+                  skill={skill}
+                  onClick={handleSkillClick}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

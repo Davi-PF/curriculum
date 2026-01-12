@@ -10,8 +10,7 @@ export const experiencesPt: ExperienceItem[] = [
     title: "Sócio-Administrador",
     description:
       "Como sócio administrador no Mercado dos Sonhos, fui responsável por supervisionar vários aspectos do negócio, desde o planejamento estratégico até as operações diárias. Esse papel me permitiu desenvolver minhas habilidades de liderança e gestão, ao mesmo tempo em que contribuía para o crescimento e sucesso da empresa.",
-    extraActivities:
-      "Algumas responsabilidades que desempenhei incluíram:",
+    extraActivities: "Algumas responsabilidades que desempenhei incluíram:",
     activities: [
       {
         title: "Gestão da empresa e tomada de decisões estratégicas.",
@@ -88,16 +87,19 @@ export const experiencesPt: ExperienceItem[] = [
             type: "demo",
             label: "Demo Vídeo",
             url: "https://www.youtube.com/watch?v=FnB7Do6TG_Q",
+            variant: "project",
           },
           {
             type: "github",
             label: "Mobile Repo",
             url: "https://github.com/Davi-PF/projeto-conclusao-curso-mobile",
+            variant: "project",
           },
           {
             type: "github",
             label: "Backend Repo",
             url: "https://github.com/WesleySardi/2.1__Java__projeto-conclusao-curso-backend",
+            variant: "project",
           },
         ],
       },
@@ -110,6 +112,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/Projeto-Integrador-RH",
+            variant: "project",
           },
         ],
       },
@@ -118,21 +121,38 @@ export const experiencesPt: ExperienceItem[] = [
         description:
           "Aplicativo de horas complementares, desenvolvido em uma competição na faculdade. Feito em Dart com Firebase.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/catolica_mhc" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/catolica_mhc",
+            variant: 'project',
+          },
         ],
       },
       {
         title: "Aplicativo para filtragem de logs do Windows",
         description:
           "Aplicativo para filtragem de logs do Windows para troubleshooting de clientes corporativos. Feito com Powershell.",
-        links: [{ type: "github", label: "Repo", url: "https://github.com/Davi-PF/CBSFilter" }],
+        links: [
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/CBSFilter",
+            variant: 'project',
+          },
+        ],
       },
       {
         title: "Aplicativo de Escolha de filmes",
         description:
           "Aplicativo de Escolha de filmes utilizando Netbeans e MySQL.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/POO-PopcornHub" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/POO-PopcornHub",
+            variant: 'project'
+          },
         ],
       },
       {
@@ -144,6 +164,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "colab",
             label: "Colab",
             url: "https://colab.research.google.com/drive/1rTnP8CDtHyOobdT4_Uy_qjud2n7u9s-4?usp=sharing",
+            variant: 'project'
           },
         ],
       },
@@ -156,6 +177,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "colab",
             label: "Drive",
             url: "https://drive.google.com/drive/folders/1ihT9hlsOihsA_wBR2dDjswRPthLiL95q?usp=sharing",
+            variant: 'project'
           },
         ],
       },
@@ -164,7 +186,12 @@ export const experiencesPt: ExperienceItem[] = [
         description:
           "Website pessoal (este portfolio) desenvolvido com Next.js e Tailwind CSS.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/curriculum" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/curriculum",
+            variant: 'project'
+          },
         ],
       },
       {
@@ -176,6 +203,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "GitHub",
             url: "https://github.com/Davi-PF?page=1&tab=repositories",
+            variant: 'project'
           },
         ],
       },
