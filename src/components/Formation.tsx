@@ -4,6 +4,8 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 import { educationByLanguage } from "../data/education";
 
+import { ExpandableText } from "./ExpandableText/ExpandableText";
+
 export default function Formation() {
   const { t, language } = useLanguage();
 
@@ -53,10 +55,14 @@ export default function Formation() {
                 </p>
 
                 {item.description && (
-                  <p className="mt-2 text-sm text-emerald-400/70">
-                    {item.description}
-                  </p>
-                )}
+  <ExpandableText
+    text={item.description}
+    key={item.id}
+    clampLines={2}
+    className={`mt-2 text-sm text-emerald-400/70`}
+  />
+)}
+
               </div>
             </li>
           ))}

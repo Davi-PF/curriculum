@@ -51,4 +51,8 @@ export const pt: Translations = {
   footer: {
     rights: "Davi Prudente Ferreira, Todos os direitos reservados.",
   },
+  expandable: {
+    showMore: "Ler mais",
+    showLess: "Ver menos"
+  }
 };

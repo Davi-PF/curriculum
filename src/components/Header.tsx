@@ -24,10 +24,10 @@ export default function Header() {
         sticky top-0 z-50
         bg-stone-800/90 backdrop-blur-md
         shadow-lg transition-all duration-300
-        ${isScrolled ? "py-0.05" : "py-2"}
+        ${isScrolled ? "py-0.05" : "py-1"}
       `}
     >
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container mx-auto px-3 py-4">
         <div
           className="
   relative
@@ -42,60 +42,60 @@ export default function Header() {
     justify-self-start
     bg-stone-800/50 backdrop-blur-md
     inset-ring-1 inset-ring-stone-600/40
-    rounded-xl sm:rounded-full
+    rounded-full
+    sm:p-3 sm:px-6
     shadow-sm
-    max-w-full
     transition-all duration-300
     ${
       isScrolled
-        ? "px-3 py-1"
-        : "px-3 py-1.5 sm:px-4 sm:py-2"
+        ? "px-2 py-2"
+        : "px-3 py-2 sm:px-4 sm:py-2"
     }
+    mr-2 sm:mr-0
   `}
 >
-
             <h1
-  className={`
+              className={`
+                text-center
     font-bold text-emerald-300
     leading-tight
     transition-all duration-300
     ${
       isScrolled
-        ? "text-sm sm:text-lg md:text-xl"
+        ? "text-xs sm:text-lg md:text-xl"
         : "text-sm sm:text-xl md:text-3xl"
     }
   `}
->
-
+            >
               {t.header.title}
             </h1>
           </div>
 
           {/* Centro */}
           <div
-            className="justify-self-center
-  px-2
-  sm:static sm:translate-x-0 sm:px-0
-"
+            className="
+    justify-self-center
+    px-4
+    sm:px-0
+  "
           >
-            <LanguageSwitcher />
+            <LanguageSwitcher isScrolled={isScrolled} />
           </div>
 
           {/* Direita */}
-          <div className="justify-self-end">
+          <div className="justify-self-end pr-4.5">
             <div
-  className={`
+              className={`
     relative rounded-full overflow-hidden
     inset-ring-1 inset-ring-emerald-500 shadow-lg
     transition-all duration-300
     ${
       isScrolled
         ? "w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16"
-        : "w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20"
+        : "w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20"
     }
   `}
->
-
+            >
               <Image
                 src="/images/profile.jpg"
                 alt="Foto de perfil"

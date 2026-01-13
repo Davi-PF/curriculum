@@ -11,11 +11,13 @@ const styles = {
     title: "text-sm",
     description: "text-xs text-emerald-400/70",
     showDescription: true,
+    descriptionClass: ""
   },
   project: {
     title: "text-sm",
     description: "text-xs text-emerald-400/60",
-    showDescription: "sm:block hidden",
+    showDescription: true,
+    descriptionClass: "hidden sm:block",
   },
 };
 
@@ -39,33 +41,47 @@ export function ExperienceActivityItem({
     >
       <div className="flex flex-col gap-0.5">
         {primaryLink ? (
-          <div className="flex items-center gap-1">
-            <a
-              href={primaryLink.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`text-emerald-300 font-medium hover:underline ${style.title}`}
-            >
+          <a
+            href={primaryLink.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              flex items-center gap-1
+              text-emerald-300 font-medium
+              hover:underline
+              group
+            "
+          >
+            <span className={style.title}>
               {activity.title}
-            </a>
-
-            <span className="text-emerald-400/70 text-xs">↗</span>
+            </span>
 
             <Image
               src={getLinkIcon(primaryLink.type)}
               alt={primaryLink.type}
               width={16}
               height={16}
+              className="
+                ml-2
+                opacity-70
+                transition-opacity
+                group-hover:opacity-100
+              "
             />
-          </div>
+          </a>
         ) : (
           <span className={`text-emerald-300 ${style.title}`}>
             {activity.title}
           </span>
         )}
 
-        {style.showDescription && (
-          <p className={`${style.description} ${style.showDescription}`}>
+        {style.showDescription && activity.description && (
+          <p
+            className={`
+              ${style.description}
+              ${style.descriptionClass ?? ""}
+            `}
+          >
             {activity.description}
           </p>
         )}

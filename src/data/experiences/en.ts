@@ -83,16 +83,19 @@ export const experiencesEn: ExperienceItem[] = [
             type: "demo",
             label: "Demo Vídeo",
             url: "https://www.youtube.com/watch?v=FnB7Do6TG_Q",
+            variant: "project",
           },
           {
             type: "github",
             label: "Mobile Repo",
             url: "https://github.com/Davi-PF/projeto-conclusao-curso-mobile",
+            variant: "project",
           },
           {
             type: "github",
             label: "Backend Repo",
             url: "https://github.com/WesleySardi/2.1__Java__projeto-conclusao-curso-backend",
+            variant: "project",
           },
         ],
       },
@@ -104,6 +107,7 @@ export const experiencesEn: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/Projeto-Integrador-RH",
+            variant: "project",
           },
         ],
       },
@@ -112,20 +116,37 @@ export const experiencesEn: ExperienceItem[] = [
         description:
           "Complementary hours application, developed in a competition at college. Made in Dart with Firebase.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/catolica_mhc" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/catolica_mhc",
+            variant: "project"
+          },
         ],
       },
       {
         title: "Application for filtering Windows logs",
         description:
           "Application for filtering Windows logs for troubleshooting corporate clients. Made with Powershell.",
-        links: [{ type: "github", label: "Repo", url: "https://github.com/Davi-PF/CBSFilter" }],
+        links: [
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/CBSFilter",
+            variant: "project"
+          },
+        ],
       },
       {
         title: "Movie Choice application",
         description: "Movie Choice application using Netbeans and MySQL.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/POO-PopcornHub" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/POO-PopcornHub",
+            variant: "project"
+          },
         ],
       },
       {
@@ -137,6 +158,7 @@ export const experiencesEn: ExperienceItem[] = [
             type: "colab",
             label: "Colab",
             url: "https://colab.research.google.com/drive/1rTnP8CDtHyOobdT4_Uy_qjud2n7u9s-4?usp=sharing",
+            variant: "project"
           },
         ],
       },
@@ -149,6 +171,7 @@ export const experiencesEn: ExperienceItem[] = [
             type: "colab",
             label: "Google Colab",
             url: "https://drive.google.com/drive/folders/1ihT9hlsOihsA_wBR2dDjswRPthLiL95q?usp=sharing",
+            variant: "project"
           },
         ],
       },
@@ -157,7 +180,12 @@ export const experiencesEn: ExperienceItem[] = [
         description:
           "Personal website (this portfolio) developed with Next.js and Tailwind CSS.",
         links: [
-          { type: "github", label: "Repo", url: "https://github.com/Davi-PF/curriculum" },
+          {
+            type: "github",
+            label: "Repo",
+            url: "https://github.com/Davi-PF/curriculum",
+            variant: "project"
+          },
         ],
       },
       {
@@ -169,6 +197,7 @@ export const experiencesEn: ExperienceItem[] = [
             type: "github",
             label: "GitHub",
             url: "https://github.com/Davi-PF?page=1&tab=repositories",
+            variant: "project"
           },
         ],
       },

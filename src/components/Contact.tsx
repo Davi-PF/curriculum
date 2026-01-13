@@ -58,6 +58,8 @@ export default function Contact() {
               className="
     flex items-center gap-2
     text-emerald-400
+    text-xs
+    sm:text-lg
     underline
     underline-offset-3
     sm:hover:underline
@@ -89,6 +91,8 @@ export default function Contact() {
               className="
     flex items-center gap-2
     text-emerald-400
+    text-xs
+    sm:text-lg
     underline
     underline-offset-3
     sm:hover:underline
@@ -118,7 +122,7 @@ export default function Contact() {
               href="https://www.linkedin.com/in/daviprudente/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-emerald-400 underline underline-offset-3 sm:hover:underline"
+              className="flex items-center gap-2 text-emerald-400 text-xs sm:text-lg underline underline-offset-3 sm:hover:underline"
             >
               <Image
                 src="/images/icons/linkedin.png"
@@ -137,7 +141,7 @@ export default function Contact() {
           <div className="flex items-center justify-center gap-2 mb-2">
             <a
               href="https://github.com/Davi-PF"
-              className="flex items-center gap-2 text-emerald-400 underline underline-offset-3 sm:hover:underline"
+              className="flex items-center gap-2 text-emerald-400 text-xs sm:text-lg underline underline-offset-3 sm:hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >

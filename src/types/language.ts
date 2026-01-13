@@ -48,4 +48,8 @@ export interface Translations {
   footer: {
     rights: string;
   };
+  expandable: {
+    showMore: string;
+    showLess: string;
+  }
 }

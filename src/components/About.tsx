@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "../contexts/LanguageContext";
+import { ExpandableText } from "./ExpandableText/ExpandableText";
 
 export default function About() {
   const { t } = useLanguage();
@@ -13,7 +14,12 @@ export default function About() {
           </h2>
         </div>
         <div className="bg-stone-600/30 backdrop-blur-md inset-ring-1 inset-ring-stone-700/40 p-4 sm:p-6 rounded-xl shadow-xl relative mb-2">
-          <p className="text-emerald-500 text-justify">{t.about.description}</p>
+          <ExpandableText
+          text={t.about.description}
+          clampLines={3}
+          key={t.about.title}
+          className="text-emerald-500"
+          />
         </div>
       </div>
     </section>

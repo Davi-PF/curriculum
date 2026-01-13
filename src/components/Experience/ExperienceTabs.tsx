@@ -47,7 +47,7 @@ export function ExperienceTabs({
             className="
           bg-slate-200 
           inset-ring-1 inset-ring-stone-300 
-          p-3 sm:p-2
+          p-2 sm:p-2
           rounded-full shadow-md"
           >
             <Image
