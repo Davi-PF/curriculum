@@ -3,7 +3,7 @@ import Hero from "../components/Hero";
 import About from "../components/About";
 import Experience from "../components/Experience/Experience";
 import Skills from "../components/Skills/Skills";
-import Contact from "../components/Contact";
+import Contact from "../components/Contact/Contact";
 import Footer from "../components/Footer";
 import Formation from "../components/Formation";
 

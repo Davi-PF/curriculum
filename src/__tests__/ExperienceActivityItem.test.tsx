@@ -3,8 +3,17 @@ import { ExperienceActivityItem } from '../components/Experience/ExperienceActiv
 import { makeActivity } from './factories/activityFactory';
 
 describe('ExperienceActivityItem', () => {
-  it('renders description hidden by default for project variant', () => {
-  const activity = makeActivity({ variant: 'project' });
+  it('hides description for project variant on small screens', () => {
+  const activity = makeActivity({
+    links: [
+      {
+        type: 'github',
+        label: 'Repo',
+        url: 'https://github.com/test',
+        variant: 'project',
+      },
+    ],
+  });
 
   render(<ExperienceActivityItem activity={activity} />);
 
@@ -14,19 +23,17 @@ describe('ExperienceActivityItem', () => {
   expect(description).toHaveClass('hidden');
 });
 
-});
 
-it('renders activity title', () => {
-  const activity = makeActivity({ title: 'Minha atividade' });
 
-  render(<ExperienceActivityItem activity={activity} />);
+  it('renders activity title', () => {
+    const activity = makeActivity({ title: 'Minha atividade' });
 
-  expect(
-    screen.getByText('Minha atividade')
-  ).toBeInTheDocument();
-});
+    render(<ExperienceActivityItem activity={activity} />);
 
-it('renders activity links', () => {
+    expect(screen.getByText('Minha atividade')).toBeInTheDocument();
+  });
+
+  it('renders activity link with correct href', () => {
   const activity = makeActivity({
     links: [
       {
@@ -39,24 +46,28 @@ it('renders activity links', () => {
 
   render(<ExperienceActivityItem activity={activity} />);
 
-  expect(
-    screen.getByRole('link', { name: /repositório/i })
-  ).toHaveAttribute('href', 'https://github.com/test');
-});
-
-it('uses correct icon for github link', () => {
-  const activity = makeActivity({
-    links: [
-      {
-        type: 'github',
-        label: 'GitHub',
-        url: '#',
-      },
-    ],
+  const link = screen.getByRole('link', {
+    name: /título da atividade github/i,
   });
 
-  render(<ExperienceActivityItem activity={activity} />);
+  expect(link).toHaveAttribute('href', 'https://github.com/test');
+});
 
-  const image = screen.getByAltText(/github/i);
-  expect(image).toHaveAttribute('src', expect.stringContaining('github'));
+
+  it('uses correct icon for github link', () => {
+    const activity = makeActivity({
+      links: [
+        {
+          type: 'github',
+          label: 'GitHub',
+          url: '#',
+        },
+      ],
+    });
+
+    render(<ExperienceActivityItem activity={activity} />);
+
+    const image = screen.getByAltText(/github/i);
+    expect(image).toHaveAttribute('src', expect.stringContaining('github'));
+  });
 });
