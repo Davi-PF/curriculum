@@ -5,7 +5,7 @@ import Experience from "../components/Experience/Experience";
 import Skills from "../components/Skills/Skills";
 import Contact from "../components/Contact/Contact";
 import Footer from "../components/Footer";
-import Formation from "../components/Formation";
+import Formation from "../components/Formation/Formation";
 
 export default function Home() {
   return (
