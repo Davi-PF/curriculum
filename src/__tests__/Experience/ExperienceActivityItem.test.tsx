@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { ExperienceActivityItem } from '../components/Experience/ExperienceActivityItem';
-import { makeActivity } from './factories/activityFactory';
+import { ExperienceActivityItem } from '../../components/Experience/ExperienceActivityItem';
+import { makeActivity } from '../factories/activityFactory';
 
 describe('ExperienceActivityItem', () => {
   it('hides description for project variant on small screens', () => {

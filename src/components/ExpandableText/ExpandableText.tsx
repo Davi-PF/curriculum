@@ -31,24 +31,21 @@ export function ExpandableText({
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   const toggleExpanded = () => {
-  setExpanded((prev) => !prev);
-  setHasUserInteracted(true);
-};
-
-
+    setExpanded((prev) => !prev);
+    setHasUserInteracted(true);
+  };
 
   const clampClass = expanded
     ? "line-clamp-none"
     : clampClassMap[clampLines] ?? "line-clamp-3";
 
-  const hyphenationClass =
-    language === "pt" ? "hyphens-auto" : "hyphens-none";
+  const hyphenationClass = language === "pt" ? "hyphens-auto" : "hyphens-none";
 
   useEffect(() => {
     const el = ref.current;
+    /* istanbul ignore if -- ref is always set after mount in this component */
     if (!el) return;
 
-    // Força estado clampado apenas para medição
     el.style.display = "-webkit-box";
     el.style.webkitLineClamp = String(clampLines);
     el.style.overflow = "hidden";
@@ -57,8 +54,6 @@ export function ExpandableText({
       setIsExpandable(el.scrollHeight > el.clientHeight);
     });
   }, [text, clampLines]);
-
-  
 
   return (
     <div>

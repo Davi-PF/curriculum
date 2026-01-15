@@ -79,7 +79,7 @@ export function ExperienceActivityItem({
           <p
             className={`
               ${style.description}
-              ${style.descriptionClass ?? ""}
+              ${style.descriptionClass}
             `}
           >
             {activity.description}

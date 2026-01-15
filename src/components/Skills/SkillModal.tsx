@@ -1,7 +1,6 @@
 import { Skill } from "@/src/types/skill";
 import { createPortal } from 'react-dom';
 
-
 interface SkillModalProps {
   readonly skill: Skill | null;
   readonly isOpen: boolean;

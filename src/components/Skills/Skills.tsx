@@ -5,8 +5,8 @@ import { useSelectedSkill } from "./hooks/useSelectedSkill";
 import { SkillButton } from "./SkillButton";
 import { SkillModal } from "./SkillModal";
 
-import { useLanguage } from "@/src/contexts/LanguageContext";
-import { skillsByLanguage } from "@/src/data/skills";
+import { useLanguage } from "../../contexts/LanguageContext";
+import { skillsByLanguage } from "../../data/skills";
 
 export default function Skills() {
   const { t, language } = useLanguage();

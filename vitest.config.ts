@@ -5,14 +5,26 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./vitest.setup.tsx",
+
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
-      reportsDirectory: './coverage',
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      reportsDirectory: "./coverage",
+
+      include: [
+        "src/**/*.{ts,tsx}",
+      ],
+
       exclude: [
-        'node_modules/',
-        'src/main.tsx',
-        'src/vite-env.d.ts',
+        "**/src/app/**",
+        "**/node_modules/**",
+        "**/.next/**",
+        "**/dist/**",
+        "**/*.d.ts",
+        "**/types/**",
+        "**/data/**",
+        "**/__tests__/**",
+        "**/*.test.{ts,tsx}",
       ],
     },
   },
