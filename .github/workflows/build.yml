@@ -12,7 +12,13 @@ on:
 jobs:
   ci:
     name: Install, Test & SonarQube
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+      statuses: write
 
     # roda em push na dev e PRs abertos (não no closed)
     if: >
@@ -25,9 +31,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js v22.11.0
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
-          node-version: '22.11.0'
+          node-version: "22.11.0"
 
       - name: Install dependencies
         run: npm ci
@@ -36,23 +42,38 @@ jobs:
         run: npx vitest run --coverage
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
           args: |
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_KEY }}
+            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+
+      - name: SonarCloud Quality Gate
+        if: github.event_name == 'pull_request'
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        with:
+          scanMetadataReportFile: .scannerwork/report-task.txt
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        timeout-minutes: 5
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   deploy_vercel:
     name: Deploy to Vercel (Production)
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     # Deploy SOMENTE quando PR dev -> master for merged
     if: >
@@ -68,7 +89,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.11.0'
+          node-version: "22.11.0"
 
       - name: Install dependencies
         run: npm ci
@@ -77,7 +98,8 @@ jobs:
         run: npm i -g vercel
 
       - name: Deploy to Vercel (Production)
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel --prod --token "$VERCEL_TOKEN"

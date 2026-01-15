@@ -37,7 +37,7 @@ export function SkillModal({
         className={`
           relative w-full max-w-lg
           rounded-xl
-          bg-stone-800/90 backdrop-blur-md
+          bg-stone-800/90 backdrop-blur-sm
           inset-ring-1 inset-ring-emerald-500/40
           shadow-2xl p-6 sm:p-8
           

@@ -33,15 +33,15 @@ export default function Skills() {
 
   return (
     <section className="mb-12 text-center">
-      <div className="bg-stone-800/50 backdrop-blur-md inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-lg shadow-sm relative mb-2">
-        <div className="inline-block bg-stone-300/20 backdrop-blur-md inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-7 rounded-full shadow-lg relative hover:bg-stone-300/30 transition-color">
+      <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-lg shadow-sm relative mb-2">
+        <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-7 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
           <h2 className="text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.skill.title}
           </h2>
         </div>
         <div>
-          <div className="bg-stone-800/50 backdrop-blur-md inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative">
-            <div className="inline-block bg-stone-300/20 backdrop-blur-md inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/30 transition-color">
+          <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative">
+            <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
               <h3 className="text-lg font-bold text-emerald-400 m-1 text-center">
                 {t.skill.hardSkills}
               </h3>
@@ -53,7 +53,7 @@ export default function Skills() {
               className="
           flex flex-wrap justify-center
           max-w-4xl
-          gap-2 bg-stone-600/30 backdrop-blur-md 
+          gap-2 bg-stone-600/30 backdrop-blur-sm
           inset-ring-1 inset-ring-stone-700/40 
           p-4 sm:p-6 
           rounded-b-lg shadow-lg "
@@ -70,8 +70,8 @@ export default function Skills() {
         </div>
 
         <div>
-          <div className="bg-stone-800/50 backdrop-blur-md inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative mt-7">
-            <div className="inline-block bg-stone-300/20 backdrop-blur-md inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/30 transition-color">
+          <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative mt-7">
+            <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
               <h3 className="text-lg font-bold text-emerald-400 m-1 text-center">
                 {t.skill.softSkills}
               </h3>
@@ -82,7 +82,7 @@ export default function Skills() {
               className="
           flex flex-wrap justify-center
           max-w-4xl
-          gap-2 bg-stone-600/30 backdrop-blur-md 
+          gap-2 bg-stone-600/30 backdrop-blur-sm 
           inset-ring-1 inset-ring-stone-700/40 
           p-4 sm:p-6 
           rounded-b-lg shadow-lg "

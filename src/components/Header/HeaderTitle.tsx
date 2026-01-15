@@ -13,7 +13,7 @@ export function HeaderTitle({ isScrolled }: HeaderTitleProps) {
     <div
       className={`
         justify-self-start
-        bg-stone-800/50 backdrop-blur-md
+        bg-stone-800/50
         inset-ring-1 inset-ring-stone-600/40
         rounded-full
         sm:p-3 sm:px-6
