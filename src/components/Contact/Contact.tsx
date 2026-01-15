@@ -11,9 +11,9 @@ export default function Contact() {
 
   return (
     <section className="mt-12 mb-5 text-center">
-      <div className="space-y-2 bg-stone-800/50 backdrop-blur-md inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-t-lg shadow-sm relative mb-2">
+      <div className="space-y-2 bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-t-lg shadow-sm relative mb-2">
         {/* título + descrição */}
-        <div className="inline-block bg-stone-300/20 backdrop-blur-md inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-4 rounded-full shadow-lg relative hover:bg-stone-300/30 transition-color">
+        <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-4 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
           <h2 className="text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.contact.title}
           </h2>

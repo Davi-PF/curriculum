@@ -24,7 +24,7 @@ export function ContactToast({ type }: ContactToastProps) {
     <div
       className={`
         fixed bottom-6 left-1/2 -translate-x-1/2
-        bg-stone-900/80 backdrop-blur-md
+        bg-stone-900/80 backdrop-blur-sm
         inset-ring-1
         px-4 py-2
         rounded-full shadow-lg

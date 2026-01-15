@@ -12,12 +12,12 @@ export function ExperiencePanel({ experience }: ExperiencePanelProps) {
   return (
     <div
       className="
-    bg-stone-600/30 backdrop-blur-md 
+    bg-stone-600/30 backdrop-blur-sm 
     inset-ring-1 inset-ring-stone-700/40 
     p-4 sm:p-6 mb-2 
     rounded-b-lg shadow-xl relative 
     hover:bg-stone-600/20 
-    transition-all duration-300
+    transition-colors duration-300
     animate-fade-in"
     >
       <div className="absolute top-6 left-3 sm:left-6.5 bg-slate-200 inset-ring-1 inset-ring-stone-300 p-1.5 rounded-full shadow-md">

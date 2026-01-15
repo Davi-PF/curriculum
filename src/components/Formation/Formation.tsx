@@ -11,7 +11,7 @@ export default function Formation() {
 
   return (
     <section className="mt-12 text-center">
-      <div className="space-y-2 bg-stone-800/50 backdrop-blur-md inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-t-lg shadow-sm relative">
+      <div className="space-y-2 bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-t-lg shadow-sm relative">
         <FormationHeader />
         <FormationTimeline education={education} />
       </div>
