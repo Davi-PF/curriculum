@@ -9,6 +9,12 @@ on:
       - master
     types: [opened, synchronize, reopened, closed]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+
 jobs:
   ci:
     name: Install, Test & SonarQube
@@ -27,7 +33,7 @@ jobs:
       - name: Set up Node.js v22.11.0
         uses: actions/setup-node@v3
         with:
-          node-version: '22.11.0'
+          node-version: "22.11.0"
 
       - name: Install dependencies
         run: npm ci
@@ -41,9 +47,19 @@ jobs:
           args: |
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_KEY }}
+            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: SonarCloud Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        with:
+          scanMetadataReportFile: .scannerwork/report-task.txt
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        timeout-minutes: 5
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
@@ -68,7 +84,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.11.0'
+          node-version: "22.11.0"
 
       - name: Install dependencies
         run: npm ci

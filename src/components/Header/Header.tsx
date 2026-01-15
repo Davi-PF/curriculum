@@ -10,14 +10,23 @@ export default function Header() {
 
   return (
     <header
-      className={`
-        sticky top-0 z-50
-        bg-stone-800/90 backdrop-blur-md
-        shadow-lg transition-all duration-300
-        ${isScrolled ? "py-0.05" : "py-1"}
-      `}
-    >
-      <nav className="container mx-auto px-3 py-4">
+  className={`
+    sticky top-0 z-50
+    shadow-lg
+    transition-[background-color,box-shadow] duration-300
+    ${isScrolled ? "bg-stone-900/60" : "bg-stone-800/30"}
+  `}
+>
+
+      <nav
+        className={`
+      container mx-auto px-3 py-4
+      transition-transform duration-300 origin-top
+      ${isScrolled ? "scale-[0.98] translate-y-[-1px]" : "scale-100 translate-y-0"}
+      header-nav-anim
+
+    `}
+      >
         <div
           className="
             relative
