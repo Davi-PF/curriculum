@@ -17,7 +17,13 @@ export default function Contact() {
           <h2 className="text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.contact.title}
           </h2>
+
+          
         </div>
+        <div>
+          <p className="text-justify sm:text-center text-emerald-500 sm:text-lg">{t.contact.description}</p>
+        </div>
+        
 
         <div className="flex flex-col items-center gap-2 mb-2">
           <ContactItem
