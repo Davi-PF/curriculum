@@ -42,7 +42,7 @@ jobs:
         run: npx vitest run --coverage
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccf4f1f0a0249b1d0d0b1d3c5b67c0ea # v6.0.0
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
           args: |
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
