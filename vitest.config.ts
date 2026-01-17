@@ -5,15 +5,13 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./vitest.setup.tsx",
+    // evita child_process (forks) que dá EPERM no Windows
+    pool: "threads",
 
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       reportsDirectory: "./coverage",
-
-      include: [
-        "src/**/*.{ts,tsx}",
-      ],
 
       exclude: [
         "**/src/app/**",
