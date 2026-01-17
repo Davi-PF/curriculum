@@ -1,71 +1,148 @@
-# My Portfolio
+# Portfolio / Currículo Online
 
-A personal portfolio website built with Next.js to showcase work experience and projects.
+Este repositório contém meu **portfolio pessoal e currículo online**, desenvolvido com foco em **clareza, acessibilidade, qualidade de código e boas práticas de frontend moderno**.
 
-## Getting Started
+O projeto apresenta informações profissionais, experiência, habilidades e formas de contato, além de permitir **compartilhamento do link da página** e **acesso direto ao currículo em PDF**.
 
-First, install dependencies:
+---
+
+## ✨ Principais Funcionalidades
+
+- 📄 Currículo online com acesso ao PDF
+- 🔗 Compartilhamento da página via:
+  - Web Share API (dispositivos compatíveis)
+  - Clipboard API
+  - Fallback com `window.prompt`
+- 🌐 Internacionalização (i18n)
+- ♿ Acessibilidade (teclado, ARIA e semântica correta)
+- 🎨 Interface responsiva com Tailwind CSS
+- 🧪 Testes automatizados
+- 🔍 Qualidade de código com ESLint e SonarCloud
+- 🚀 CI/CD com GitHub Actions
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Next.js** (App Router)
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **Vitest**
+- **@testing-library/react**
+- **ESLint**
+- **SonarCloud**
+- **Codecov**
+- **Vercel**
+
+---
+
+## 📂 Estrutura do Projeto
+
+```text
+src/
+├── app/                    # App Router (layouts e páginas)
+├── components/             # Componentes reutilizáveis
+│   ├── Contact/            # Seção de contato
+│   ├── Experience/         # Seção de Experiências
+│   ├── ExpandableText/     # Responsável por manipular textos longos
+│   ├── Formation/          # Seção com formação acadêmica
+│   ├── Header/             # Seção de controle do Header
+│   ├── Skills/             # Seção de habilidades
+│   ├── About               # Componente do Sobre mim
+│   ├── Footer              # Rodapé da página
+│   ├── Hero                # Bem-vindo da aplicação
+│   ├── LanguageSwitcher    # Componente de troca de idioma
+│   └── SharePageButton     # Botão de compartilhamento
+│
+├── contexts/               # Contextos globais (ex: idioma)
+├── __tests__/              # Testes automatizados
+├── data/                   # Dados estáticos específicos (Skills, Experiences, etc)
+├── i18n/                   # Dados estáticos gerais (Títulos, descrições, etc)
+└── types/                  # Tipagem de dados
+public/
+└── images/                 # Assets estáticos
+```
+
+---
+
+## ▶️ Executando o Projeto Localmente
+
+### Pré-requisitos
+
+- Node.js **v18+** (recomendado v22)
+- npm ou yarn
+
+### Instalação
 
 ```bash
 npm install
 ```
 
-Then, run the development server:
+### Ambiente de desenvolvimento
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A aplicação estará disponível em:
 
-## Project Structure
+```
+http://localhost:3000
+```
 
-- `src/app/` - Next.js app directory with pages and layout
-- `src/components/` - Reusable React components
-- `src/__tests__/` - Test files
-- `public/` - Static assets
+---
 
-## Testing
+## 🧪 Testes
 
-Run the test suite:
+### Executar todos os testes
 
 ```bash
 npm test
 ```
 
-Run tests with coverage:
+### Executar testes com cobertura
 
 ```bash
-npm run test -- --coverage
+npx vitest run --coverage
 ```
 
-## CI/CD
 
-This project uses GitHub Actions for continuous integration and deployment. The workflow includes:
+## 🔄 CI / CD
 
-- **Testing**: Runs tests and collects coverage on Windows with Node.js v22.11.0
-- **SonarQube**: Code quality analysis on `main` and `dev` branches
-- **Codecov**: Coverage reporting
+Este projeto utiliza **GitHub Actions** para integração contínua, incluindo:
 
-### Required Secrets
+- Instalação de dependências
+- Execução de testes automatizados
+- Coleta de cobertura de código
+- Análise de qualidade com SonarCloud
+- Publicação de cobertura no Codecov
+- Deploy automático via Vercel
 
-For the CI/CD to work, set these secrets in your GitHub repository:
+---
 
-- `SONAR_TOKEN`: Your SonarCloud token
-- `SONAR_PROJECT_KEY`: Your SonarCloud project key
-- `SONAR_ORGANIZATION_KEY`: Your SonarCloud organization key
-- `CODECOV_TOKEN`: Your Codecov token
+## 🚀 Deploy
 
-## Customization
+O deploy é realizado automaticamente utilizando a **Vercel**:
 
-Edit `app/page.tsx` to update the portfolio content with your personal information, work experience, and contact details.
+1. Push do código para o GitHub
+2. Repositório conectado à Vercel
+3. Build e deploy automáticos
 
-## Deploy on Vercel
+Documentação oficial:
+https://nextjs.org/docs/app/building-your-application/deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js.
+---
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Deploy automatically
+## 📬 Contato
 
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **LinkedIn**: https://www.linkedin.com/in/daviprudente/
+- **GitHub**: https://github.com/Davi-PF
+- **E-mail**: daviprufer@gmail.com
+
+---
+
+## 📄 Licença
+
+Este projeto é de uso pessoal e demonstrativo.
+Sinta-se à vontade para se inspirar, mas não reutilizar o conteúdo diretamente.
