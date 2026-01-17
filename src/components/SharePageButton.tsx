@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 
 type Props = {
-  url?: string;
-  title?: string;
-  text?: string;
-  className?: string;
+  readonly url?: string;
+  readonly title?: string;
+  readonly text?: string;
+  readonly className?: string;
 };
 
 type Status = "idle" | "copied" | "shared" | "error";
@@ -23,13 +23,13 @@ export default function SharePageButton({
 
   const shareUrl = useMemo(() => {
     if (url) return url;
-    if (typeof window !== "undefined") return window.location.href;
+    if (globalThis.window !== undefined) return globalThis.location.href;
     return "";
   }, [url]);
 
   async function handleShare() {
     try {
-      const finalUrl = shareUrl || window.location.href;
+      const finalUrl = shareUrl || globalThis.location.href;
 
       // 1) Web Share API
       if (typeof navigator !== "undefined" && "share" in navigator) {
@@ -50,23 +50,23 @@ export default function SharePageButton({
       }
 
       // 3) Último fallback
-      window.prompt("Copie o link:", finalUrl);
+      globalThis.prompt("Copie o link:", finalUrl);
       setStatus("copied");
     } catch {
       setStatus("error");
     } finally {
-      window.setTimeout(() => setStatus("idle"), 2500);
+      globalThis.setTimeout(() => setStatus("idle"), 2500);
     }
   }
 
-  const label =
-    status === "copied"
-      ? t.shareButtonStatus.copied
-      : status === "shared"
-      ? t.shareButtonStatus.shared
-      : status === "error"
-      ? t.shareButtonStatus.error
-      : t.shareButtonStatus.share;
+  const getLabel = () => {
+    if (status === "copied") return t.shareButtonStatus.copied;
+    if (status === "shared") return t.shareButtonStatus.shared;
+    if (status === "error") return t.shareButtonStatus.error;
+    return t.shareButtonStatus.share;
+  };
+
+  const label = getLabel();
 
   return (
     <button

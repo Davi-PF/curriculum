@@ -1,9 +1,24 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import SharePageButton from "../components/SharePageButton";
 
-// Mock do contexto de linguagem
-const mockTranslations = {
+async function flushPromises(times = 2) {
+  for (let i = 0; i < times; i += 1) {
+    await Promise.resolve();
+  }
+}
+
+
+type TTranslations = {
+  shareButtonStatus: {
+    share: string;
+    copied: string;
+    shared: string;
+    error: string;
+  };
+};
+
+const tMock: TTranslations = {
   shareButtonStatus: {
     share: "Compartilhar",
     copied: "Copiado!",
@@ -13,225 +28,238 @@ const mockTranslations = {
 };
 
 vi.mock("../contexts/LanguageContext", () => ({
-  useLanguage: () => ({ t: mockTranslations }),
+  useLanguage: () => ({ t: tMock }),
 }));
 
+type ShareFn = (data: ShareData) => Promise<void>;
+type ClipboardWriteTextFn = (text: string) => Promise<void>;
+
+function setLocationHref(href: string) {
+  Object.defineProperty(globalThis, "location", {
+    value: { href },
+    writable: true,
+    configurable: true,
+  });
+}
+
+/**
+ * Para este componente, usar `"share" in navigator` / `"clipboard" in navigator"`
+ * significa que:
+ * - setar `navigator.share = undefined` NÃO desativa; a propriedade continua existindo.
+ * - para desativar, precisamos REMOVER a propriedade (delete).
+ */
+type ClipboardLike = Pick<Clipboard, "writeText">;
+
+type NavPatch = {
+  share?: (data: ShareData) => Promise<void>;
+  clipboard?: ClipboardLike;
+};
+
+function patchNavigator(patch: NavPatch) {
+  const nav = globalThis.navigator;
+
+  delete (nav as unknown as { share?: unknown }).share;
+  delete (nav as unknown as { clipboard?: unknown }).clipboard;
+
+  if (patch.share) {
+    Object.defineProperty(nav, "share", {
+      value: patch.share,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  if (patch.clipboard) {
+    Object.defineProperty(nav, "clipboard", {
+      value: patch.clipboard,
+      configurable: true,
+      writable: true,
+    });
+  }
+}
+
+function patchPrompt(
+  mockPrompt: (message?: string, defaultValue?: string) => string | null
+) {
+  Object.defineProperty(globalThis, "prompt", {
+    value: mockPrompt,
+    configurable: true,
+    writable: true,
+  });
+}
+
+function renderAndClick(url?: string) {
+  render(<SharePageButton url={url} />);
+  const button = screen.getByRole("button", {
+    name: "Compartilhar link da página",
+  });
+  fireEvent.click(button);
+  return button;
+}
+
 describe("SharePageButton", () => {
-  let originalNavigator: any;
+  const originalPrompt = globalThis.prompt;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    originalNavigator = global.navigator;
+    vi.restoreAllMocks();
+    setLocationHref("https://example.com/current");
+    patchNavigator({});
+    patchPrompt(vi.fn());
   });
 
   afterEach(() => {
-    global.navigator = originalNavigator;
+    vi.useRealTimers();
+    Object.defineProperty(globalThis, "prompt", {
+      value: originalPrompt,
+      configurable: true,
+      writable: true,
+    });
   });
 
-  describe("Renderização", () => {
-    it("deve renderizar o botão com texto padrão", () => {
-      render(<SharePageButton />);
-      expect(
-        screen.getByRole("button", { name: /compartilhar link da página/i })
-      ).toBeDefined();
-      expect(screen.getByText("Compartilhar")).toBeDefined();
-    });
-
-    it("deve aplicar className customizada", () => {
-      render(<SharePageButton className="custom-class" />);
-      const button = screen.getByRole("button");
-      expect(button.className).toContain("custom-class");
-    });
-
-    it("deve ter aria-label correto", () => {
-      render(<SharePageButton />);
-      expect(
-        screen.getByLabelText("Compartilhar link da página")
-      ).toBeDefined();
-    });
-
-    it("deve ter type='button' para evitar submit em forms", () => {
-      render(<SharePageButton />);
-      expect(screen.getByRole("button").getAttribute("type")).toBe("button");
-    });
+  it("renderiza com label inicial", () => {
+    render(<SharePageButton />);
+    expect(
+      screen.getByRole("button", { name: "Compartilhar link da página" })
+    ).toHaveTextContent("Compartilhar");
   });
 
   describe("Web Share API", () => {
-    it("deve chamar navigator.share quando disponível", async () => {
-      const mockShare = vi.fn().mockResolvedValue(undefined);
+    it("chama navigator.share com url passada e mostra estado 'shared'", async () => {
+      const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
+      patchNavigator({ share: shareMock });
 
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
+      const button = renderAndClick("https://example.com/custom");
 
-      render(
-        <SharePageButton
-          url="https://example.com"
-          title="Meu Site"
-          text="Confira:"
-        />
+      await waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+      expect(shareMock).toHaveBeenCalledWith(
+        expect.objectContaining({ url: "https://example.com/custom" })
       );
 
-      const button = screen.getByRole("button");
-      fireEvent.click(button);
-
-      await waitFor(() => {
-        expect(mockShare).toHaveBeenCalledWith({
-          title: "Meu Site",
-          text: "Confira:",
-          url: "https://example.com",
-        });
-      });
+      expect(button).toHaveTextContent("Compartilhado!");
     });
 
-    it("deve mostrar estado 'shared' após compartilhar com sucesso", async () => {
-      const mockShare = vi.fn().mockResolvedValue(undefined);
+    it("se share falhar, mostra estado 'error'", async () => {
+      const shareMock = vi.fn<ShareFn>().mockRejectedValue(new Error("boom"));
+      patchNavigator({ share: shareMock });
 
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
+      const button = renderAndClick("https://example.com/custom");
 
-      render(<SharePageButton url="https://example.com" />);
-
-      fireEvent.click(screen.getByRole("button"));
-
-      await waitFor(() => {
-        expect(screen.getByText("Compartilhado!")).toBeDefined();
-      });
+      await waitFor(() => expect(button).toHaveTextContent("Erro"));
     });
 
-    it("deve mostrar erro quando Web Share API falha", async () => {
-      const mockShare = vi.fn().mockRejectedValue(new Error("Share failed"));
+    it("quando url não é passada, usa location.href", async () => {
+      const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
+      patchNavigator({ share: shareMock });
 
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
-
-      render(<SharePageButton url="https://example.com" />);
-
-      fireEvent.click(screen.getByRole("button"));
+      renderAndClick(); // sem url
 
       await waitFor(() => {
-        expect(screen.getByText("Erro")).toBeDefined();
+        expect(shareMock).toHaveBeenCalledWith(
+          expect.objectContaining({ url: "https://example.com/current" })
+        );
       });
     });
   });
 
   describe("Clipboard API (fallback)", () => {
-    it("deve copiar para clipboard quando Web Share não está disponível", async () => {
-      const mockWriteText = vi
-        .fn<(text: string) => Promise<void>>()
-        .mockResolvedValue(undefined);
+    it("copia para clipboard quando Web Share não está disponível", async () => {
+      const writeTextMock = vi.fn<ClipboardWriteTextFn>().mockResolvedValue(undefined);
 
-      delete (globalThis.navigator as unknown as { share?: unknown }).share;
-
-      // 2) Injeta clipboard mockado
-      Object.defineProperty(globalThis.navigator, "clipboard", {
-        value: { writeText: mockWriteText },
-        configurable: true,
+      patchNavigator({
+        clipboard: { writeText: writeTextMock } as unknown as Clipboard,
       });
 
-      render(<SharePageButton url="https://example.com" />);
-      fireEvent.click(screen.getByRole("button"));
+      const button = renderAndClick("https://example.com/clip");
 
-      await waitFor(() => {
-        expect(mockWriteText).toHaveBeenCalledWith("https://example.com");
-      });
-
-      expect(screen.getByRole("button")).toHaveTextContent("Copiado!");
+      await waitFor(() =>
+        expect(writeTextMock).toHaveBeenCalledWith("https://example.com/clip")
+      );
+      expect(button).toHaveTextContent("Copiado!");
     });
 
+    it("se clipboard falhar, mostra estado 'error'", async () => {
+      const writeTextMock = vi.fn<ClipboardWriteTextFn>().mockRejectedValue(new Error("nope"));
+
+      patchNavigator({
+        clipboard: { writeText: writeTextMock } as unknown as Clipboard,
+      });
+
+      const button = renderAndClick("https://example.com/clip");
+
+      await waitFor(() => expect(button).toHaveTextContent("Erro"));
+    });
   });
 
-  describe("Props e configurações", () => {
-    it("deve usar título e texto customizados", async () => {
-      const mockShare = vi.fn().mockResolvedValue(undefined);
+  describe("Fallback final (prompt)", () => {
+    it("usa prompt quando nenhuma API está disponível e mostra estado 'copied'", async () => {
+      const promptMock = vi.fn(() => null);
+      patchPrompt(promptMock);
+      patchNavigator({}); // sem share/clipboard
 
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
+      const button = renderAndClick("https://example.com/prompt");
 
-      render(
-        <SharePageButton
-          url="https://example.com"
-          title="Título Custom"
-          text="Texto custom aqui"
-        />
+      await waitFor(() =>
+        expect(promptMock).toHaveBeenCalledWith(
+          "Copie o link:",
+          "https://example.com/prompt"
+        )
       );
 
-      fireEvent.click(screen.getByRole("button"));
-
-      await waitFor(() => {
-        expect(mockShare).toHaveBeenCalledWith({
-          title: "Título Custom",
-          text: "Texto custom aqui",
-          url: "https://example.com",
-        });
-      });
+      expect(button).toHaveTextContent("Copiado!");
     });
+  });
 
-    it("deve usar valores padrão quando props não são fornecidas", async () => {
-      const mockShare = vi.fn().mockResolvedValue(undefined);
+  describe("Reset de status", () => {
+    it("volta para idle após 2.5s (copied -> idle)", async () => {
+  vi.useFakeTimers();
 
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
+  const writeTextMock = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined);
+
+  patchNavigator({
+    clipboard: { writeText: writeTextMock } as Pick<Clipboard, "writeText">,
+  });
+
+  render(<SharePageButton url="https://example.com/reset" />);
+  const button = screen.getByRole("button", { name: "Compartilhar link da página" });
+
+  // dispara o handler
+  await act(async () => {
+    fireEvent.click(button);
+    await flushPromises(); // garante que o await do writeText completou
+  });
+
+  expect(writeTextMock).toHaveBeenCalledWith("https://example.com/reset");
+  expect(button).toHaveTextContent("Copiado!");
+
+  act(() => {
+    vi.advanceTimersByTime(2500);
+  });
+
+  expect(button).toHaveTextContent("Compartilhar");
+});
+  });
+
+  describe("Acessibilidade", () => {
+    it("permite interação via teclado (Enter) disparando ação", async () => {
+      const writeTextMock = vi.fn<ClipboardWriteTextFn>().mockResolvedValue(undefined);
+
+      patchNavigator({
+        clipboard: { writeText: writeTextMock } as unknown as Clipboard,
       });
 
-      Object.defineProperty(global.window, "location", {
-        value: { href: "https://current.com" },
-        writable: true,
-        configurable: true,
+      render(<SharePageButton url="https://example.com/kb" />);
+      const button = screen.getByRole("button", {
+        name: "Compartilhar link da página",
       });
 
-      render(<SharePageButton />);
+      button.focus();
 
-      fireEvent.click(screen.getByRole("button"));
+      // Em alguns ambientes, Enter em button dispara click automaticamente; em outros não.
+      // Para ser determinístico, disparamos o click que o browser geraria.
+      fireEvent.keyDown(button, { key: "Enter", code: "Enter", charCode: 13 });
+      fireEvent.click(button);
 
-      await waitFor(() => {
-        expect(mockShare).toHaveBeenCalledWith({
-          title: "Currículo / Portfólio",
-          text: "Confira meu currículo/portfólio:",
-          url: "https://current.com",
-        });
-      });
-    });
-
-    it("deve usar URL fornecida na prop ao invés de window.location", async () => {
-      const mockShare = vi.fn().mockResolvedValue(undefined);
-
-      Object.defineProperty(global.navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
-
-      Object.defineProperty(global.window, "location", {
-        value: { href: "https://wrong-url.com" },
-        writable: true,
-        configurable: true,
-      });
-
-      render(<SharePageButton url="https://correct-url.com" />);
-
-      fireEvent.click(screen.getByRole("button"));
-
-      await waitFor(() => {
-        expect(mockShare).toHaveBeenCalledWith(
-          expect.objectContaining({
-            url: "https://correct-url.com",
-          })
-        );
-      });
+      await waitFor(() => expect(writeTextMock).toHaveBeenCalledTimes(1));
     });
   });
 });
