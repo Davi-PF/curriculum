@@ -4,6 +4,8 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { useCopyToast } from "./useCopyToast";
 import { ContactItem } from "./ContactItem";
 import { ContactToast } from "./ContactToast";
+import CurriculumDriveAccess from "./CurriculumDriveAccess";
+import SharePageButton from "../SharePageButton";
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -14,18 +16,18 @@ export default function Contact() {
       <div className="space-y-2 bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-t-lg shadow-sm relative mb-2">
         {/* título + descrição */}
         <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-4 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
-          <h2 className="text-3xl font-bold text-emerald-400 m-1 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.contact.title}
           </h2>
-
-          
         </div>
+
         <div>
-          <p className="text-justify sm:text-center text-emerald-500 sm:text-lg">{t.contact.description}</p>
+          <p className="text-justify sm:text-center text-emerald-500 sm:text-lg">
+            {t.contact.description}
+          </p>
         </div>
-        
 
-        <div className="flex flex-col items-center gap-2 mb-2">
+        <div className="flex flex-col items-center gap-2 mb-2 mt-5">
           <ContactItem
             icon="/images/icons/gmail.png"
             label={
@@ -72,6 +74,16 @@ export default function Contact() {
         </div>
 
         {copiedField && <ContactToast type={copiedField} />}
+
+        <div className="flex flex-col items-center gap-2">
+          <CurriculumDriveAccess
+            href="https://drive.google.com/file/d/11aHiBKp0m4n_V8molhdG2PeAnXOTcYqw/view?usp=sharing"
+            className="mt-3 scale-x-65 scale-y-65 sm:scale-x-100 sm:scale-y-100"
+          />
+
+          <SharePageButton title={t.shareButtonStatus.title} text={t.shareButtonStatus.text}
+          className="sm:mt-2 scale-x-65 scale-y-65 sm:scale-x-100 sm:scale-y-100" />
+        </div>
       </div>
     </section>
   );
