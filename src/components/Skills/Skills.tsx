@@ -35,7 +35,7 @@ export default function Skills() {
     <section className="mb-12 text-center">
       <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-lg shadow-sm relative mb-2">
         <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-7 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
-          <h2 className="text-3xl font-bold text-emerald-400 m-1 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.skill.title}
           </h2>
         </div>

@@ -44,12 +44,21 @@ export interface Translations {
   formation: {
     title: string;
     description: string;
-  }
+  };
   footer: {
     rights: string;
   };
   expandable: {
     showMore: string;
     showLess: string;
-  }
+  };
+  shareButtonStatus: {
+    id: string;
+    title: string;
+    text: string;
+    share: string;
+    copied: string;
+    shared: string;
+    error: string;
+  };
 }

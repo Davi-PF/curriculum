@@ -16,7 +16,7 @@ describe("ExperienceHeader", () => {
     const { container } = render(<ExperienceHeader title="XP" />);
 
     const heading = screen.getByRole("heading", { name: "XP" });
-    expect(heading).toHaveClass("text-3xl", "font-bold", "text-emerald-400");
+    expect(heading).toHaveClass("text-2xl", "sm:text-3xl", "font-bold", "text-emerald-400", "p-1", "text-center");
 
     const outer = container.querySelector("div.flex.justify-center");
     expect(outer).not.toBeNull();

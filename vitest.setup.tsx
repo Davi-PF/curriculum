@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 import React from 'react';
 import { vi } from 'vitest';

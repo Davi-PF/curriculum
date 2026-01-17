@@ -2,7 +2,7 @@ import { Translations } from "../types/language";
 
 export const pt: Translations = {
   header: {
-    title: "Curriculum Vitae",
+    title: "Davi Prudente Ferreira",
   },
   navbar: {
     home: "Início",
@@ -42,7 +42,7 @@ export const pt: Translations = {
     Email: "Email:",
     LinkedIn: "LinkedIn:",
     GitHub: "GitHub:",
-    curriculumText: "Currículo em PDF"
+    curriculumText: "Currículo em PDF",
   },
   formation: {
     title: "Formação Acadêmica",
@@ -53,6 +53,15 @@ export const pt: Translations = {
   },
   expandable: {
     showMore: "Ler mais",
-    showLess: "Ver menos"
-  }
+    showLess: "Ver menos",
+  },
+  shareButtonStatus: {
+    id: "share-page-button",
+    title: "Currículo do Davi Prudente Ferreira",
+    text: "Confira meu currículo/portfólio:",
+    share: "Compartilhar",
+    copied: "Link copiado para a área de transferência!",
+    shared: "Página compartilhada com sucesso!",
+    error: "Erro ao compartilhar o link.",
+  },
 };

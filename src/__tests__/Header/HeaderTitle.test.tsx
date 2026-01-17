@@ -12,7 +12,7 @@ describe("HeaderTitle", () => {
     renderWithLanguage(<HeaderTitle isScrolled={false} />);
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-      "Curriculum Vitae"
+      "Davi Prudente Ferreira"
     );
   });
 
