@@ -24,6 +24,7 @@ export const en: Translations = {
     hardSkills: "Hard Skills",
     softSkills: "Soft Skills",
     description: "Here are some of my main skills and competencies.",
+    hintText: "Click on a skill to see more details.",
   },
   about: {
     title: "About Me",
