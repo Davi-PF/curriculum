@@ -25,6 +25,7 @@ export const pt: Translations = {
     softSkills: "Habilidades Interpessoais",
     description:
       "Aqui estão algumas das minhas principais habilidades e competências.",
+    hintText: "Clique em uma habilidade para ver mais detalhes.",
   },
   about: {
     title: "Sobre Mim",

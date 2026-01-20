@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useModal } from "./hooks/useModal";
 import { useSelectedSkill } from "./hooks/useSelectedSkill";
-import { SkillButton } from "./SkillButton";
 import { SkillModal } from "./SkillModal";
+import { SkillGroup } from "./SkillGroup";
+import { useViewportHint } from "./hooks/useViewportHint";
 
 import { useLanguage } from "../../contexts/LanguageContext";
 import { skillsByLanguage } from "../../data/skills";
@@ -15,8 +18,22 @@ export default function Skills() {
   const { selectedSkill, selectSkill, clearSkill } = useSelectedSkill();
 
   const skills = skillsByLanguage[language];
-  const hardSkills = skills.filter((skill) => skill.id.startsWith("hard-"));
-  const softSkills = skills.filter((skill) => skill.id.startsWith("soft-"));
+
+  const hardSkills = useMemo(
+    () => skills.filter((s) => s.id.startsWith("hard-")),
+    [skills],
+  );
+  const softSkills = useMemo(
+    () => skills.filter((s) => s.id.startsWith("soft-")),
+    [skills],
+  );
+
+  const { ref: sectionRef, showHint } = useViewportHint({
+    storageKey: "skills_hint_seen",
+    threshold: 0.4,
+    durationMs: 2800,
+    reducedMotionDurationMs: 2200,
+  });
 
   const handleSkillClick = (skill: (typeof skills)[0]) => {
     selectSkill(skill);
@@ -25,78 +42,34 @@ export default function Skills() {
 
   const handleCloseModal = () => {
     closeModal();
-    // Delay clearing the skill to allow animation to complete
-    setTimeout(() => {
-      clearSkill();
-    }, 200);
+    setTimeout(() => clearSkill(), 200);
   };
 
   return (
-    <section className="mb-12 text-center">
+    <section ref={sectionRef} className="mb-12 text-center">
       <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-6 rounded-lg shadow-sm relative mb-2">
         <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-9 py-2 mb-7 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
           <h2 className="text-2xl sm:text-3xl font-bold text-emerald-400 m-1 text-center">
             {t.skill.title}
           </h2>
         </div>
-        <div>
-          <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative">
-            <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
-              <h3 className="text-lg font-bold text-emerald-400 m-1 text-center">
-                {t.skill.hardSkills}
-              </h3>
-            </div>
-          </div>
 
-          <div className="flex justify-center">
-            <div
-              className="
-          flex flex-wrap justify-center
-          max-w-4xl
-          gap-2 bg-stone-600/30 backdrop-blur-sm
-          inset-ring-1 inset-ring-stone-700/40 
-          p-4 sm:p-6 
-          rounded-b-lg shadow-lg "
-            >
-              {hardSkills.map((skill) => (
-                <SkillButton
-                  key={skill.id}
-                  skill={skill}
-                  onClick={handleSkillClick}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <SkillGroup
+          title={t.skill.hardSkills}
+          skills={hardSkills}
+          showHint={showHint}
+          hintText={t.skill.hintText}
+          onSkillClick={handleSkillClick}
+        />
 
-        <div>
-          <div className="bg-stone-800/50 backdrop-blur-sm inset-ring-1 inset-ring-stone-600/40 p-4 sm:p-5 shadow-sm relative mt-7">
-            <div className="inline-block bg-stone-300/10 inset-ring-1 inset-ring-stone-600 px-5 py-1 rounded-full shadow-lg relative hover:bg-stone-300/20 transition-colors">
-              <h3 className="text-lg font-bold text-emerald-400 m-1 text-center">
-                {t.skill.softSkills}
-              </h3>
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <div
-              className="
-          flex flex-wrap justify-center
-          max-w-4xl
-          gap-2 bg-stone-600/30 backdrop-blur-sm 
-          inset-ring-1 inset-ring-stone-700/40 
-          p-4 sm:p-6 
-          rounded-b-lg shadow-lg "
-            >
-              {softSkills.map((skill) => (
-                <SkillButton
-                  key={skill.id}
-                  skill={skill}
-                  onClick={handleSkillClick}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <SkillGroup
+          className="mt-6"
+          title={t.skill.softSkills}
+          skills={softSkills}
+          showHint={showHint}
+          hintText={t.skill.hintText}
+          onSkillClick={handleSkillClick}
+        />
 
         {isModalVisible && (
           <SkillModal

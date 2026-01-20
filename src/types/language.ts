@@ -24,6 +24,7 @@ export interface Translations {
     hardSkills: string;
     softSkills: string;
     description: string;
+    hintText: string;
   };
   about: {
     title: string;
