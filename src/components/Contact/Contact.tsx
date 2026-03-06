@@ -3,7 +3,6 @@
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useCopyToast } from "./useCopyToast";
 import { ContactItem } from "./ContactItem";
-import { ContactToast } from "./ContactToast";
 import CurriculumDriveAccess from "./CurriculumDriveAccess";
 import SharePageButton from "../SharePageButton";
 
@@ -36,6 +35,7 @@ export default function Contact() {
               </>
             }
             ariaLabel={t.contact.ariaLabelCopyEmail}
+            isCopied={copiedField === "email"}
             onClick={() => copyToClipboard("daviprufer@gmail.com", "email")}
           />
 
@@ -47,8 +47,15 @@ export default function Contact() {
               </>
             }
             ariaLabel={t.contact.ariaLabelCopyPhone}
+            isCopied={copiedField === "phone"}
             onClick={() => copyToClipboard("47999585464", "phone")}
           />
+
+          {copiedField === "error" && (
+            <p className="text-rose-300 text-[11px] sm:text-sm mt-1">
+              {t.contact.copyHandlerError}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col items-center gap-2 mb-2">
@@ -72,8 +79,6 @@ export default function Contact() {
             href="https://github.com/Davi-PF"
           />
         </div>
-
-        {copiedField && <ContactToast type={copiedField} />}
 
         <div className="flex flex-col items-center gap-2">
           <CurriculumDriveAccess

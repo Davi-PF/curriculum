@@ -15,14 +15,6 @@ interface FormationItemProps {
 export function FormationItem({ item }: FormationItemProps) {
   return (
     <li className="relative flex-1">
-      {/* Linha */}
-      <span
-        className="
-          absolute left-2 top-0 h-full w-px bg-emerald-500/30
-          md:top-2 md:left-0 md:h-px md:w-full
-        "
-      />
-
       {/* Ponto */}
       <span
         className="

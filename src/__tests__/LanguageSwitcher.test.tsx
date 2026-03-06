@@ -4,7 +4,6 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 const toggleLanguageMock = vi.fn();
 
-// Variável hoisted para permitir mudar o idioma por teste
 const languageState = vi.hoisted(() => ({ language: "pt" as "pt" | "en" }));
 
 vi.mock("../contexts/LanguageContext", () => ({
@@ -20,32 +19,28 @@ describe("LanguageSwitcher", () => {
     languageState.language = "pt";
   });
 
-  it("renders with Portuguese as default language (shows English flag)", () => {
+  it("renders with Portuguese as default language", () => {
     render(<LanguageSwitcher />);
 
-    const button = screen.getByRole("button", { name: /language switcher/i });
+    const button = screen.getByRole("button", { name: "Switch to English" });
     expect(button).toBeInTheDocument();
-
-    // quando language === 'pt', alt deve ser "English"
-    const image = screen.getByRole("img", { name: /english/i });
-    expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("src", "/images/icons/estados-unidos.png");
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(button.className).toContain("scale-100");
   });
 
-  it("renders with English language (shows Portuguese flag)", () => {
+  it("renders with English language", () => {
     languageState.language = "en";
     render(<LanguageSwitcher />);
 
-    // quando language !== 'pt', alt deve ser "Português"
-    const image = screen.getByRole("img", { name: /português/i });
-    expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute("src", "/images/icons/brasil.png");
+    const button = screen.getByRole("button", { name: /mudar para portugu/i });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute("aria-pressed", "true");
   });
 
   it("calls toggleLanguage when clicked", () => {
     render(<LanguageSwitcher />);
 
-    const button = screen.getByRole("button", { name: /language switcher/i });
+    const button = screen.getByRole("button", { name: "Switch to English" });
     fireEvent.click(button);
 
     expect(toggleLanguageMock).toHaveBeenCalledTimes(1);
@@ -54,7 +49,7 @@ describe("LanguageSwitcher", () => {
   it("applies scale class when isScrolled is true", () => {
     render(<LanguageSwitcher isScrolled />);
 
-    const button = screen.getByRole("button", { name: /language switcher/i });
+    const button = screen.getByRole("button", { name: "Switch to English" });
     expect(button.className).toContain("scale-87");
   });
 });

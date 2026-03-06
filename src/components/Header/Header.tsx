@@ -22,7 +22,7 @@ export default function Header() {
         className={`
       container mx-auto px-3 py-4
       transition-transform duration-300 origin-top
-      ${isScrolled ? "scale-[0.98] translate-y-[-1px]" : "scale-100 translate-y-0"}
+      ${isScrolled ? "scale-[0.98] translate-y-px" : "scale-100 translate-y-0"}
       header-nav-anim
 
     `}
