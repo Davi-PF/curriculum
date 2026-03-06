@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     setupFiles: "./vitest.setup.tsx",
     // evita child_process (forks) que dá EPERM no Windows
-    pool: "threads",
+    pool: "forks",
 
     coverage: {
       provider: "v8",
