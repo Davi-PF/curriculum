@@ -42,6 +42,9 @@ export const en: Translations = {
     LinkedIn: "LinkedIn:",
     GitHub: "GitHub:",
     curriculumText: "PDF Resume",
+    emailCopied: "Email copied to clipboard!",
+    phoneCopied: "Phone number copied to clipboard!",
+    copyHandlerError: "Could not copy",
   },
   formation: {
     title: "Academic Formation",
@@ -57,10 +60,11 @@ export const en: Translations = {
   shareButtonStatus: {
     id: "share-page-button",
     title: "Davi Prudente Ferreira's Resume",
-    text: "Check out my resume/portfolio:",
+    text: "Check out the resume of:",
     share: "Share",
     copied: "Link copied to clipboard!",
     shared: "Page shared successfully!",
     error: "Error sharing the link.",
   },
 };
+
