@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:ci": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage"
   },

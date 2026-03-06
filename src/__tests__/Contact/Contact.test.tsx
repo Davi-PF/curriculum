@@ -1,16 +1,23 @@
-import { screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import Contact from "../../components/Contact/Contact";
 import { renderWithLanguage } from "../test-utils";
 
-Object.assign(navigator, {
-  clipboard: {
-    writeText: vi.fn().mockResolvedValue(undefined),
+const writeTextMock = vi.fn().mockResolvedValue(undefined);
+
+Object.defineProperty(navigator, "clipboard", {
+  configurable: true,
+  value: {
+    writeText: writeTextMock,
   },
 });
 
 describe("Contact", () => {
-  it("renderiza seção de contato e exibe toast ao copiar email", async () => {
+  beforeEach(() => {
+    writeTextMock.mockClear();
+  });
+
+  it("renderiza secao de contato e copia email ao clicar", async () => {
     renderWithLanguage(<Contact />);
 
     expect(
@@ -20,15 +27,19 @@ describe("Contact", () => {
     const emailButton = screen.getByLabelText(/copiar email/i);
     fireEvent.click(emailButton);
 
-    expect(await screen.findByText(/email copiado/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith("daviprufer@gmail.com");
+    });
   });
 
-  it("exibe toast ao copiar telefone", async () => {
+  it("copia telefone ao clicar", async () => {
     renderWithLanguage(<Contact />);
 
     const phoneButton = screen.getByLabelText(/copiar telefone/i);
     fireEvent.click(phoneButton);
 
-    expect(await screen.findByText(/telefone copiado/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith("47999585464");
+    });
   });
 });

@@ -41,6 +41,9 @@ export interface Translations {
     LinkedIn: string;
     GitHub: string;
     curriculumText: string;
+    emailCopied: string;
+    phoneCopied: string;
+    copyHandlerError: string;
   };
   formation: {
     title: string;

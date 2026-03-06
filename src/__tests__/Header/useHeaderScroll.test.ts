@@ -3,12 +3,12 @@ import { describe, it, expect } from 'vitest';
 import { useHeaderScroll } from '../../components/Header/useHeaderScroll';
 
 function setScrollY(value: number) {
-    Object.defineProperty(globalThis, 'scrollY', {
-      writable: true,
-      configurable: true,
-      value
-    });
-  }
+  Object.defineProperty(globalThis, 'scrollY', {
+    writable: true,
+    configurable: true,
+    value,
+  });
+}
 
 describe('useHeaderScroll', () => {
   it('retorna false inicialmente', () => {
@@ -19,8 +19,8 @@ describe('useHeaderScroll', () => {
     expect(result.current).toBe(false);
   });
 
-  it('retorna true quando scrollY ultrapassa o threshold padrão', () => {
-    setScrollY(10);
+  it('retorna true quando scrollY ultrapassa o threshold padrao', () => {
+    setScrollY(25);
 
     const { result } = renderHook(() => useHeaderScroll());
 
@@ -32,7 +32,7 @@ describe('useHeaderScroll', () => {
   });
 
   it('retorna false quando scrollY fica abaixo do threshold', () => {
-    setScrollY(10);
+    setScrollY(25);
 
     const { result } = renderHook(() => useHeaderScroll());
 

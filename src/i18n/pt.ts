@@ -44,6 +44,9 @@ export const pt: Translations = {
     LinkedIn: "LinkedIn:",
     GitHub: "GitHub:",
     curriculumText: "Currículo em PDF",
+    emailCopied: "Email copiado para a área de transferência!",
+    phoneCopied: "Telefone copiado para a área de transferência!",
+    copyHandlerError: "Não foi possível copiar",
   },
   formation: {
     title: "Formação Acadêmica",
@@ -59,10 +62,11 @@ export const pt: Translations = {
   shareButtonStatus: {
     id: "share-page-button",
     title: "Currículo do Davi Prudente Ferreira",
-    text: "Confira meu currículo/portfólio:",
+    text: "Confira o currículo de:",
     share: "Compartilhar",
     copied: "Link copiado para a área de transferência!",
     shared: "Página compartilhada com sucesso!",
     error: "Erro ao compartilhar o link.",
   },
 };
+

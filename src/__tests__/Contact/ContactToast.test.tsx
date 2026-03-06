@@ -1,12 +1,14 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { ContactToast } from '../../components/Contact/ContactToast';
+import { renderWithLanguage } from '../test-utils';
+import { translations } from '../../i18n';
 
 describe('ContactToast', () => {
   it('renders email toast correctly', () => {
-    render(<ContactToast type="email" />);
+    renderWithLanguage(<ContactToast type="email" />);
 
-    const toast = screen.getByText('Email copiado');
+    const toast = screen.getByText(translations.pt.contact.emailCopied);
 
     expect(toast).toBeInTheDocument();
     expect(toast).toHaveClass('text-emerald-300');
@@ -14,9 +16,9 @@ describe('ContactToast', () => {
   });
 
   it('renders phone toast correctly', () => {
-    render(<ContactToast type="phone" />);
+    renderWithLanguage(<ContactToast type="phone" />);
 
-    const toast = screen.getByText('Telefone copiado');
+    const toast = screen.getByText(translations.pt.contact.phoneCopied);
 
     expect(toast).toBeInTheDocument();
     expect(toast).toHaveClass('text-sky-300');
@@ -24,9 +26,9 @@ describe('ContactToast', () => {
   });
 
   it('renders error toast correctly', () => {
-    render(<ContactToast type="error" />);
+    renderWithLanguage(<ContactToast type="error" />);
 
-    const toast = screen.getByText('Não foi possível copiar');
+    const toast = screen.getByText(translations.pt.contact.copyHandlerError);
 
     expect(toast).toBeInTheDocument();
     expect(toast).toHaveClass('text-rose-300');

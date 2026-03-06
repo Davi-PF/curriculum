@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ContactItem } from '../../components/Contact/ContactItem';
@@ -49,34 +48,24 @@ describe('ContactItem', () => {
       />
     );
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Copiar telefone' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar telefone' }));
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('shows clipboard icon when onClick is provided', () => {
-    render(
-      <ContactItem
-        icon="/icon.png"
-        label="Email"
-        onClick={() => {}}
-      />
-    );
+    render(<ContactItem icon="/icon.png" label="Email" onClick={() => {}} />);
 
-    expect(screen.getByText('📋')).toBeInTheDocument();
+    const button = screen.getByRole('button');
+    expect(button.querySelector('svg')).toBeInTheDocument();
   });
 
   it('does not show clipboard icon when onClick is not provided', () => {
     render(
-      <ContactItem
-        icon="/icon.png"
-        label="LinkedIn"
-        href="https://linkedin.com"
-      />
+      <ContactItem icon="/icon.png" label="LinkedIn" href="https://linkedin.com" />
     );
 
-    expect(screen.queryByText('📋')).not.toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link.querySelector('svg')).not.toBeInTheDocument();
   });
 });
