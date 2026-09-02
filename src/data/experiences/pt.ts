@@ -2,6 +2,74 @@ import { ExperienceItem } from "@/src/types/ExperienceRelated/ExperienceItem";
 
 export const experiencesPt: ExperienceItem[] = [
   {
+    id: "neogrid",
+    company: "Neogrid",
+    period: "07/26 - 09/26",
+    logo: "/images/logos/logoNeogrid.png",
+
+    title: "Analista de Customer Services JR",
+    description:
+      "Como Analista de Customer Services Jr., fui responsável pelo atendimento e suporte a clientes, atuando na análise e resolução de chamados, acompanhamento do fluxo de dados e validação de informações. Também participei de processos de integração e configuração de sistemas, contribuindo para a identificação de inconsistências e para a manutenção da qualidade e disponibilidade dos dados. Essa experiência me permitiu desenvolver habilidades em atendimento B2B, análise de dados, suporte técnico e resolução de problemas.",
+    extraActivities: "Algumas responsabilidades que desempenhei incluíram:",
+    activities: [
+      {
+        title:
+          "Atendimento e suporte a clientes por chamados, chat e ligações.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Triagem, análise e acompanhamento de solicitações e incidentes.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Análise e validação de dados, identificando inconsistências e falhas no fluxo de informações.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Instalação, configuração e validação de sistemas coletores de dados.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Monitoramento do recebimento e processamento de dados enviados por clientes.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Suporte na resolução de problemas relacionados a integrações, arquivos e sistemas.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Comunicação com clientes, distribuidores e pontos focais para acompanhamento das tratativas.",
+        description: "",
+        links: [],
+      },
+
+      {
+        title:
+          "Registro e acompanhamento das soluções e procedimentos realizados nos chamados.",
+        description: "",
+        links: [],
+      },
+    ],
+  },
+  {
     id: "mercado-dos-sonhos",
     company: "Mercado dos Sonhos",
     period: "06/24 - 08/25",
@@ -125,7 +193,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/catolica_mhc",
-            variant: 'project',
+            variant: "project",
           },
         ],
       },
@@ -138,7 +206,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/CBSFilter",
-            variant: 'project',
+            variant: "project",
           },
         ],
       },
@@ -151,7 +219,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/POO-PopcornHub",
-            variant: 'project'
+            variant: "project",
           },
         ],
       },
@@ -164,7 +232,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "colab",
             label: "Colab",
             url: "https://colab.research.google.com/drive/1rTnP8CDtHyOobdT4_Uy_qjud2n7u9s-4?usp=sharing",
-            variant: 'project'
+            variant: "project",
           },
         ],
       },
@@ -177,7 +245,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "colab",
             label: "Drive",
             url: "https://drive.google.com/drive/folders/1ihT9hlsOihsA_wBR2dDjswRPthLiL95q?usp=sharing",
-            variant: 'project'
+            variant: "project",
           },
         ],
       },
@@ -190,7 +258,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "Repo",
             url: "https://github.com/Davi-PF/curriculum",
-            variant: 'project'
+            variant: "project",
           },
         ],
       },
@@ -203,7 +271,7 @@ export const experiencesPt: ExperienceItem[] = [
             type: "github",
             label: "GitHub",
             url: "https://github.com/Davi-PF?page=1&tab=repositories",
-            variant: 'project'
+            variant: "project",
           },
         ],
       },

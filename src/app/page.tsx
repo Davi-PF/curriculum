@@ -13,7 +13,7 @@ export default function Home() {
       <Header />
 
       <div className="min-h-screen animated-bg">
-        <main className="container mx-auto px-4 py-12 max-w-4xl">
+        <main className="container mx-auto px-4 py-12 max-w-5xl">
           <div className="p-4 sm:p-6 rounded-lg shadow-sm relative">
             <Hero />
             <About />
