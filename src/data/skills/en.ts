@@ -1,35 +1,197 @@
 import { Skill } from "@/src/types/skill";
 
 export const skillsEn: Skill[] = [
-  { id: "hard-react", label: "React", description: "Since I've learned React, I have been using it for every single web application. Just the fact you can use a single page to build a dynamic component flow, make it a must have for web development in my opinion."},
-  { id: "hard-typescript", label: "TypeScript", description: "It's the first time that I'm using it to make something. For the get go, I can say that it's cleaner than common Javascript, better organized and very, very readable."},
-  { id: "hard-nextjs", label: "Next.js", description: "Same case as the Typescript. I always heard that NextJS is better than NodeJS and that it makes integration with server-side applications safer and better. On this project I haven't use all it's potencial, but I'm pretty sure that I will be using it from now on, instead of NodeJS."},
-  { id: "hard-nodejs", label: "Node.js", description: "Well, React and NodeJS when I learned was pretty much the must have combo. I've builded most of my web side applications using it."},
-  { id: "hard-java", label: "Java", description: "As for Java, I have first learned about it on my IT Tech course. Using Netbeans to build GUIs and making my first steps into the realm of programming. I must say is one of the best programming languages to start learning. Almost all backends applications I've built was using it with Spring Boot and Maven."},
-  { id: "hard-postgresql", label: "PostgreSQL", description: "One of the best tools to deal with data. I haven't learned all it's capabilities yet, but the few I know based on my previous knowledge of MySQL, makes it a unregretable choice to use."},
-  { id: "hard-mysql", label: "MySQL", description: "MySQL was the first data related storage I've used to handle data. But since I've learned PostgreSQL it has been abandoned. I still know how to fetch queries and some other stuff, but I would need a recap on this one."},
-  { id: "hard-powershell", label: "PowerShell", description: "This is a interesting topic. I always liked to modify Windows, and on my internship we had to use Powershell Scripts to automate and handle the clients' infrastructure remotely. That was the first time I've used Powerscript and Shell Script to do automations."},
-  { id: "hard-javascript", label: "JavaScript", description: "JavaScript is the backbone of modern web development. I've been studying it since my IT Tech course and have never been able to dismiss it. Now I'm learning its frameworks to see how much its potential has grown."},
-  { id: "hard-python", label: "Python", description: "Used in academic analysis projects and smaller automation tasks"},
-  { id: "hard-html", label: "HTML", description: "I've been using HTML since my first contacts with web development, back in the IT Tech course. With it I learned how to structure pages and create functional interfaces, being the indispensable base for any web application."},
-  { id: "hard-css", label: "CSS", description: "CSS has always been essential to give style and identity to my web applications. I keep learning new techniques and features, and I'm impressed by the versatility it offers to create modern and responsive interfaces."},
-  { id: "hard-git", label: "Git", description: "I'm still learning it and improve my Git skills. All projects I have are on GitHub, and every single one of them I did something I was learning with Git. Being Wikis, automations, Workflows, and so on."},
-  { id: "hard-mecm", label: "MECM", description: "Used in my internship for large-scale software management and deployment"},
-  { id: "hard-aws", label: "AWS", description: "Used in my final project for cloud hosting and service management. We used S3, RDS, Elastic beanstalk and other features."},
-  { id: "hard-spring-boot", label: "Spring Boot", description: "Selected for the final graduation project to ensure clear, reliable frontend development, while aligning with the team’s existing experience with Spring Boot."},
-  { id: "hard-wsus", label: "WSUS", description: "Used in my internship for managing Windows updates in a corporate network"},
-  { id: "soft-gestao-pessoas", label: "People Management", description: "During my time at the company, through managing the internal team and handling day-to-day operations, I learned how to effectively interact with and navigate recurring situations. I am truly grateful for these experiences, as they contributed significantly to my growth both as a person and as a professional."},
-  { id: "soft-gestao-recursos", label: "Resource Management", description: "Working in retail allowed me to develop a solid understanding of financial and human resource allocation, ensuring consistent service quality and product excellence."},
-  { id: "soft-gestao-riscos", label: "Risk Management", description: "Identified, analyzed, and mitigated risks in both internship and retail environments, handling complex situations according to the context in which they occurred."},
-  { id: "soft-gestao-operacional", label: "Operational Management", description: "Focused on process optimization and operational efficiency improvement, applied across all activities I have performed, currently perform, and will continue to perform."},
-  { id: "soft-lideranca", label: "Leadership", description: "As mentioned in people management, I acted as a “leader” of the internal team. While there is still room for growth, this is an area where I already feel a strong connection and sense of responsibility."},
-  { id: "soft-comunicacao-eficaz", label: "Effective Communication", description: "Continuously practiced to ensure clear and fluent communication with any audience, whether spoken or written."},
-  { id: "soft-resolucao-problemas", label: "Problem Solving", description: "Among my skills, this is the one I relate to the most. While problems can be stressful and create uncomfortable situations, they are essential to the existence of work. I genuinely enjoy the problem-solving process, and despite its challenges, reaching a satisfactory resolution is deeply rewarding."},
-  { id: "soft-pensamento-estrategico", label: "Strategic Thinking", description: "I view this “skill” as closely tied to problem-solving, as it requires strategic thinking to prevent issues from recurring. I apply this approach consistently in my work to ensure solutions are effective and do not require rework unless absolutely necessary."},
-  { id: "soft-negociacao", label: "Negotiation", description: "Greatly influenced by my time at Mercado dos Sonhos, where I worked closely with suppliers to ensure competitive pricing compared to nearby markets while maintaining high-quality standards for our customers."},
-  { id: "soft-trabalho-equipe", label: "Teamwork", description: "I tend to work more effectively independently, as I follow specific collaboration standards. However, both during my internship and at Mercado dos Sonhos, I worked as part of a team to achieve shared objectives. I understand the importance of teamwork and can adapt as needed to different situations."},
-  { id: "soft-adaptabilidade", label: "Adaptability", description: "Based on my experiences and the diversity between them, it is clear that I am highly versatile. I currently possess solid skills and am capable of developing new ones as needed, depending on interest and situational requirements."},
-  { id: "soft-mentalidade-crescimento", label: "Growth Mindset", description: "I consistently seek to stay up to date with new knowledge that has a positive impact on my personal and professional development. Through podcasts, articles, news, and other sources, I recognize that there is always something new to learn—whether highly specific or more general. I value all forms of content, as they can offer diverse perspectives and insights that are often unexpectedly valuable."},
-  { id: "soft-relacionamento-cliente", label: "Customer Relationship", description: "This skill was developed through frequent interactions during my time in retail, where I handled customer feedback and consistently sought to exceed local competitors’ standards in both service and product quality. Even during my internship, I aimed to deliver requested tasks with excellence, providing accurate and reliable information to internal stakeholders and my team, ensuring integrity and consistency."}
+  {
+    id: "hard-react",
+    label: "React",
+    description:
+      "Since I've learned React, I have been using it for every single web application. Just the fact you can use a single page to build a dynamic component flow, make it a must have for web development in my opinion.",
+  },
+  {
+    id: "hard-typescript",
+    label: "TypeScript",
+    description:
+      "It's the first time that I'm using it to make something. For the get go, I can say that it's cleaner than common Javascript, better organized and very, very readable.",
+  },
+  {
+    id: "hard-nextjs",
+    label: "Next.js",
+    description:
+      "Same case as the Typescript. I always heard that NextJS is better than NodeJS and that it makes integration with server-side applications safer and better. On this project I haven't use all it's potencial, but I'm pretty sure that I will be using it from now on, instead of NodeJS.",
+  },
+  {
+    id: "hard-nodejs",
+    label: "Node.js",
+    description:
+      "Well, React and NodeJS when I learned was pretty much the must have combo. I've builded most of my web side applications using it.",
+  },
+  {
+    id: "hard-java",
+    label: "Java",
+    description:
+      "As for Java, I have first learned about it on my IT Tech course. Using Netbeans to build GUIs and making my first steps into the realm of programming. I must say is one of the best programming languages to start learning. Almost all backends applications I've built was using it with Spring Boot and Maven.",
+  },
+  {
+    id: "hard-postgresql",
+    label: "PostgreSQL",
+    description:
+      "One of the best tools to deal with data. I haven't learned all it's capabilities yet, but the few I know based on my previous knowledge of MySQL, makes it a unregretable choice to use.",
+  },
+  {
+    id: "hard-mysql",
+    label: "MySQL",
+    description:
+      "MySQL was the first data related storage I've used to handle data. But since I've learned PostgreSQL it has been abandoned. I still know how to fetch queries and some other stuff, but I would need a recap on this one.",
+  },
+  {
+    id: "hard-powershell",
+    label: "PowerShell",
+    description:
+      "This is a interesting topic. I always liked to modify Windows, and on my internship we had to use Powershell Scripts to automate and handle the clients' infrastructure remotely. That was the first time I've used Powerscript and Shell Script to do automations.",
+  },
+  {
+    id: "hard-javascript",
+    label: "JavaScript",
+    description:
+      "JavaScript is the backbone of modern web development. I've been studying it since my IT Tech course and have never been able to dismiss it. Now I'm learning its frameworks to see how much its potential has grown.",
+  },
+  {
+    id: "hard-python",
+    label: "Python",
+    description:
+      "Used in academic analysis projects and smaller automation tasks",
+  },
+  {
+    id: "hard-html",
+    label: "HTML",
+    description:
+      "I've been using HTML since my first contacts with web development, back in the IT Tech course. With it I learned how to structure pages and create functional interfaces, being the indispensable base for any web application.",
+  },
+  {
+    id: "hard-css",
+    label: "CSS",
+    description:
+      "CSS has always been essential to give style and identity to my web applications. I keep learning new techniques and features, and I'm impressed by the versatility it offers to create modern and responsive interfaces.",
+  },
+  {
+    id: "hard-git",
+    label: "Git",
+    description:
+      "I'm still learning it and improve my Git skills. All projects I have are on GitHub, and every single one of them I did something I was learning with Git. Being Wikis, automations, Workflows, and so on.",
+  },
+  {
+    id: "hard-mecm",
+    label: "MECM",
+    description:
+      "Used in my internship for large-scale software management and deployment",
+  },
+  {
+    id: "hard-aws",
+    label: "AWS",
+    description:
+      "Used in my final project for cloud hosting and service management. We used S3, RDS, Elastic beanstalk and other features.",
+  },
+  {
+    id: "hard-spring-boot",
+    label: "Spring Boot",
+    description:
+      "Used primarily to develop the backend of my graduation project. I worked with REST APIs, database integration, business rules, and application structure using Spring Boot, Java, Maven, and JPA.",
+  },
+  {
+    id: "hard-wsus",
+    label: "WSUS",
+    description:
+      "Used in my internship for managing Windows updates in a corporate network",
+  },
+  {
+    id: "hard-data-analysis",
+    label: "Data Analysis",
+    description:
+      "My experience with data analysis began during my professional career, where I worked with information validation, identification of inconsistencies, analysis of historical data, and monitoring of data flows. I have also applied this skill in academic and personal projects to turn information into insights and support problem-solving.",
+  },
 
+  {
+    id: "hard-data-integration",
+    label: "Data Integration",
+    description:
+      "During my professional experience, I worked with monitoring data flows between different systems, validating the receipt, processing, and availability of information. I also participated in the installation and configuration of data collection systems and investigated issues related to data submission and file processing.",
+  },
+  {
+    id: "soft-gestao-pessoas",
+    label: "People Management",
+    description:
+      "During my time at the company, through managing the internal team and handling day-to-day operations, I learned how to effectively interact with and navigate recurring situations. I am truly grateful for these experiences, as they contributed significantly to my growth both as a person and as a professional.",
+  },
+  {
+    id: "soft-gestao-recursos",
+    label: "Resource Management",
+    description:
+      "Working in retail allowed me to develop a solid understanding of financial and human resource allocation, ensuring consistent service quality and product excellence.",
+  },
+  {
+    id: "soft-gestao-riscos",
+    label: "Risk Management",
+    description:
+      "Throughout my professional and academic experiences, I have learned to identify potential risks before they become larger problems. I try to evaluate different scenarios, understand their impacts, and make decisions that reduce the possibility of rework or undesirable outcomes.",
+  },
+  {
+    id: "soft-gestao-operacional",
+    label: "Operational Management",
+    description:
+      "Focused on process optimization and operational efficiency improvement, applied across all activities I have performed, currently perform, and will continue to perform.",
+  },
+  {
+    id: "soft-lideranca",
+    label: "Leadership",
+    description:
+      "My experience with leadership came primarily from managing the team at Mercado dos Sonhos, where I was responsible for coordinating activities, making decisions, and dealing with different situations on a daily basis. I still consider this a skill in continuous development, but it was an important experience in understanding how effective leadership directly influences a team's work.",
+  },
+  {
+    id: "soft-comunicacao-eficaz",
+    label: "Effective Communication",
+    description:
+      "Continuously practiced to ensure clear and fluent communication with any audience, whether spoken or written.",
+  },
+  {
+    id: "soft-resolucao-problemas",
+    label: "Problem Solving",
+    description:
+      "Among my skills, this is the one I relate to the most. While problems can be stressful and create uncomfortable situations, they are essential to the existence of work. I genuinely enjoy the problem-solving process, and despite its challenges, reaching a satisfactory resolution is deeply rewarding.",
+  },
+  {
+    id: "soft-pensamento-estrategico",
+    label: "Strategic Thinking",
+    description:
+      "I view this “skill” as closely tied to problem-solving, as it requires strategic thinking to prevent issues from recurring. I apply this approach consistently in my work to ensure solutions are effective and do not require rework unless absolutely necessary.",
+  },
+  {
+    id: "soft-negociacao",
+    label: "Negotiation",
+    description:
+      "Greatly influenced by my time at Mercado dos Sonhos, where I worked closely with suppliers to ensure competitive pricing compared to nearby markets while maintaining high-quality standards for our customers.",
+  },
+  {
+    id: "soft-trabalho-equipe",
+    label: "Teamwork",
+    description:
+      "I tend to work more effectively independently, as I follow specific collaboration standards. However, both during my internship and at Mercado dos Sonhos, I worked as part of a team to achieve shared objectives. I understand the importance of teamwork and can adapt as needed to different situations.",
+  },
+  {
+    id: "soft-adaptabilidade",
+    label: "Adaptability",
+    description:
+      "My experiences have taken place in very different contexts, from managing a business to customer support and technology-related activities. This diversity taught me how to adapt to new situations, learn different tools and processes, and develop new knowledge according to the needs of each context.",
+  },
+  {
+    id: "soft-mentalidade-crescimento",
+    label: "Growth Mindset",
+    description:
+      "I believe there is always something new to learn, regardless of how much knowledge we already have. I try to stay up to date through different sources, such as articles, podcasts, news, and practical projects, seeking to turn new knowledge into opportunities to improve both personally and professionally.",
+  },
+  {
+    id: "soft-relacionamento-cliente",
+    label: "Customer Relationship",
+    description:
+      "This skill was developed through frequent interactions during my time in retail, where I handled customer feedback and consistently sought to exceed local competitors’ standards in both service and product quality. Even during my internship, I aimed to deliver requested tasks with excellence, providing accurate and reliable information to internal stakeholders and my team, ensuring integrity and consistency.",
+  },
 ];
