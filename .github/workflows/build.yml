@@ -2,33 +2,44 @@ name: CI & Deploy
 
 on:
   push:
-    branches: [dev]
+    branches:
+      - master
+      - dev
+      - integration/security-quality
   pull_request:
-    branches: [master]
-    types: [opened, synchronize, reopened, closed]
+    branches:
+      - master
+      - integration/security-quality
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:
-    name: Install, Test & SonarQube
+    name: Install, Validate, Test & SonarQube
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     permissions:
       contents: read
-      pull-requests: write
-      checks: write
-      statuses: write
-
-    if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && github.event.action != 'closed')
+      pull-requests: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           cache: npm
@@ -36,11 +47,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Typecheck (TypeScript)
+        run: npx tsc --noEmit
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Run tests with coverage
         run: npm run test:coverage
 
+      - name: Build production (SSG)
+        run: npm run build
+
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
           args: |
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
@@ -52,43 +72,51 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: SonarCloud Quality Gate
-        if: github.event_name == 'pull_request'
-        uses: SonarSource/sonarqube-quality-gate-action@v1
+        if: >
+          github.event_name == 'pull_request' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   deploy_vercel:
     name: Deploy to Vercel
+    needs: ci
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
 
     if: >
-      github.event_name == 'pull_request' &&
-      github.event.action == 'closed' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'master' &&
-      github.event.pull_request.head.ref == 'dev'
+      success() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm i -g vercel
+      - name: Install Vercel CLI
+        run: npm i -g vercel@65.14.0
 
-      - name: Deploy
+      - name: Deploy to production
         run: vercel --prod --token "$VERCEL_TOKEN"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
