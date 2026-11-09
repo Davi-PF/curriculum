@@ -31,7 +31,7 @@
 
 ### `[SEC-02]` Ausência de Cabeçalhos HTTP de Segurança e Exposição de `X-Powered-By` (DAST / Configuração)
 - **Severidade:** Média
-- **Arquivos Afetadas:** `next.config.ts`
+- **Arquivos Afetados:** `next.config.ts`
 - **Impacto Potencial:** Ausência de defesa em profundidade contra *Clickjacking* (falta de `X-Frame-Options` e `frame-ancestors`), *MIME-sniffing* (falta de `X-Content-Type-Options: nosniff`), injeção de scripts/estilos de terceiros (falta de `Content-Security-Policy`), vazamento excessivo de URL de referência (falta de `Referrer-Policy`), uso indevido de APIs de hardware (falta de `Permissions-Policy`) e exposição desnecessária do cabeçalho `X-Powered-By: Next.js`.
 - **Status Atual:** **`Integrado` em `integration/security-quality` (`fbb64d9` / merge `c872bc0`) [`VERIFICADO`]**.
 - **Branch Responsável:** `security/http-headers`
@@ -80,7 +80,7 @@
   2. Permissão desnecessária do esquema `blob:` em `img-src` (`img-src 'self' data: blob:`), sem que a aplicação utilize URLs `blob:`.
   3. Permissão desnecessária do esquema `data:` em `font-src` (`font-src 'self' data:`), dado que todas as 11 faces de fonte `.woff2` geradas por `next/font/google` são servidas exclusivamente via `'self'` (`/_next/static/media/*.woff2`).
   4. Ausência de suíte de testes unitários automatizados para validar continuamente a configuração de `headers()` e as diretivas CSP de produção e desenvolvimento em `next.config.ts`.
-- **Status Atual:** **`Validado` na branch local `security/content-security-policy` [`VERIFICADO`] / `PENDENTE` de merge em `integration/security-quality`**.
+- **Status Atual:** **`Integrado` em `integration/security-quality` (`3428e7f` / merge `178fce2953a3e3a9444b0c2741322a4ed844d1a3`) [`VERIFICADO`]**.
 - **Branch Responsável:** `security/content-security-policy`
 - **Medida Corretiva Adotada:**
   1. Adicionada a diretiva explícita `frame-src 'none'` à CSP, bloqueando integralmente o carregamento de `<frame>` e `<iframe>` pela página.
@@ -88,28 +88,48 @@
   3. Restringida `font-src` para `'self'` (removendo `data:`), autorizando apenas os arquivos `.woff2` auto-hospedados em `/_next/static/media/`.
   4. Mantido `script-src 'self' 'unsafe-inline'` em produção (restringindo `'unsafe-eval'` estritamente a `NODE_ENV === "development"`) e `style-src 'self' 'unsafe-inline'` após comprovação técnica no build `.next/server/app/` de que o Next.js 16.4.5 SSG injeta 6–7 scripts inline `self.__next_f.push(...)` com hashes variáveis por build e estilos inline em `next/image` e `_not-found.html`.
   5. Exportadas as funções `buildCspHeader(isDev)` e `getSecurityHeaders(isDev)` em `next.config.ts` e criada a suíte automatizada `src/__tests__/nextConfigHeaders.test.ts` (4 testes cobrindo 100% de `next.config.ts`).
-- **Evidência de Validação:**
+- **Evidência de Validação (`3428e7f` / `178fce2`):**
   - **Validação estática:** `npx tsc --noEmit` (código `0`) e `npm run lint` (código `0`, `0 errors, 0 warnings`).
   - **Validação automatizada (Vitest):** `npm run test:coverage` (código `0`: `33 passed`, `118 passed`; cobertura de `100%` em `next.config.ts` e `98.75%` statements global).
   - **Validação de build (SSG):** `npm run build` (código `0`; rotas `/` e `/_not-found` pré-renderizadas como `○ Static`).
-  - **Validação HTTP (`next start`):** Respostas `200` (`/`) e `404` (`/rota-inexistente-404`) confirmadas sem `X-Powered-By` e com a nova string CSP e demais 4 cabeçalhos de segurança.
-  - **Validação em navegador real (Google Chrome headless via CDP contra `next start`):** `0` violações `securitypolicyviolation`, `0` falhas de rede, `13` faces de fonte carregadas (`document.fonts.status === "loaded"`) e navegação/interação íntegras em `/` e `/rota-inexistente-404`.
-  - **Validação em produção remota (Vercel):** Não executada nesta etapa (push e deploy não autorizados antes da revisão e integração).
-- **Risco Residual (`RISCO ACEITO`):** A presença de `'unsafe-inline'` em `script-src` e `style-src` permanece como concessão arquitetural estritamente necessária para preservar a geração estática (SSG) no Next.js 16.4.5 App Router sem introduzir SSR/Middleware dinâmico por requisição (`ADR-008`), sendo mitigada pela ausência de `'unsafe-eval'` em produção, bloqueio total de origens externas (`default-src 'self'`, `object-src 'none'`, `base-uri 'self'`, `frame-src 'none'`, `frame-ancestors 'none'`) e auditoria SAST limpa (`[SEC-06]`).
+  - **Validação HTTP e Navegador Real (`next start` + Google Chrome headless via CDP):** Respostas `200` (`/`) e `404` (`/rota-inexistente-404`) confirmadas sem `X-Powered-By`, com a nova CSP, `0` violações `securitypolicyviolation`, `0` falhas de rede e `13` faces de fonte carregadas.
+- **Risco Residual (`RISCO ACEITO`):** A presença de `'unsafe-inline'` em `script-src` e `style-src` permanece como concessão arquitetural estritamente necessária para preservar a geração estática (SSG) no Next.js 16.4.5 App Router sem introduzir SSR/Middleware dinâmico por requisição (`ADR-008`), sendo mitigada pela ausência de `'unsafe-eval'` em produção, bloqueio total de origens externas e auditoria SAST limpa (`[SEC-06]`).
 
 ---
 
-### `[SEC-05]` Exposição Pública de Dados de Contato e Currículo Externo — Privacidade *(anteriormente registrado como SEC-04)*
-- **Severidade:** Baixa / Informativa
-- **Arquivos Afetados:** `src/components/Contact/Contact.tsx`, `README.md`, `src/components/CurriculumDriveAccess/CurriculumDriveAccess.tsx`
-- **Impacto Potencial:** Coleta automatizada (*scraping*) de endereço de e-mail e número de telefone por bots de spam/phishing em repositório público.
-- **Status Atual:** **`Aceito como risco residual` [`RISCO ACEITO`]** para a aplicação de portfólio; **regra de proteção ativa na documentação (`VERIFICADO`)** proibindo replicar telefone/e-mail nos arquivos de `docs/` e `AGENTS.md`.
-- **Branch Responsável:** N/A (Decisão de negócio; higienização documental aplicada em `docs/project-playbook`).
-- **Medida Corretiva Adotada:** Manter os links funcionais na UI para recrutadores, omitir dados pessoais em texto puro na documentação técnica (`AGENTS.md` e `docs/`) e manter verificação de que imagens em `public/images/` não possuem metadados EXIF de GPS (`VERIFICADO`).
+### `[SEC-05]` Auditoria e Hardening de Privacidade, Minimização de URLs Compartilhadas e Avaliação Técnica LGPD
+- **Escopo da Auditoria:** Inspeção integral de fluxos de tratamento de dados pessoais, formulários, cookies, Web Storage, scripts/SDKs de terceiros, metadados binários de imagens, logs, variáveis de ambiente e avaliação técnica sob os princípios da LGPD (Lei nº 13.709/2018) em `src/**`, `public/**`, `next.config.ts`, `package.json`, `package-lock.json`, `.github/workflows/**` e `.next/**`.
+- **Severidade Geral:** Baixa (`Low` para `SEC-05-01` e `SEC-05-02`; `Informational` para `SEC-05-03` e `SEC-05-04`)
+- **Arquivos Afetados:** `src/components/SharePageButton.tsx`, `src/__tests__/SharePageButton.test.tsx`, `docs/project-guidelines/03-security-baseline.md`, `docs/project-guidelines/08-security-findings-and-risks.md`
+- **Achados Detalhados da Auditoria (`SEC-05-01` a `SEC-05-04`):**
+  1. **`[SEC-05-01]` (`Low` — Corrigido na branch `security/privacy-audit`): Propagação de query string e fragmento da URL ao compartilhar página em `SharePageButton.tsx`**
+     - **Evidência Técnica:** Em `src/components/SharePageButton.tsx` (linhas 26 e 32 anteriores), a URL padrão de compartilhamento era obtida via `globalThis.location.href`, divergindo da diretriz documentada na seção 1.2 de `03-security-baseline.md` (`window.location.origin + pathname`).
+     - **Impacto:** Caso um visitante acessasse o portfólio por um link contendo parâmetros de rastreamento de campanha/terceiros (`?utm_source=...`, `?fbclid=...`, `?gclid=...`) ou fragmentos (`#...`) e acionasse o botão de compartilhamento, `location.href` repassava esses parâmetros para a API `navigator.share`, para o clipboard (`navigator.clipboard.writeText`) ou para o fallback `window.prompt`.
+     - **Medida Corretiva Adotada:** Implementada a função `getCanonicalPageUrl()` em `src/components/SharePageButton.tsx`, construindo a URL estritamente a partir de `${origin}${pathname}` quando a prop `url` não é informada, e adicionados 2 novos testes unitários em `src/__tests__/SharePageButton.test.tsx` verificando o descarte de query string e hash tanto na Web Share API quanto no fallback de Clipboard.
+  2. **`[SEC-05-02]` (`Low` — `Aceito como risco residual` [`RISCO ACEITO`]): Exposição pública voluntária de dados de contato profissional do titular do portfólio**
+     - **Evidência Técnica:** `src/components/Contact/Contact.tsx` (linhas 34, 39, 46, 51) e `README.md` (linha 141) exibem e-mail e telefone profissionais do autor para contato por recrutadores.
+     - **Impacto:** Risco de coleta automatizada (*scraping*) por bots em repositório/site público. Nenhum dado de visitantes é coletado.
+     - **Medida Adotada:** Mantido na UI como decisão funcional de negócio do próprio titular (`ADR-006`), preservando a regra ativa que proíbe replicar e-mail/telefone em texto puro em `AGENTS.md` e `docs/project-guidelines/**`.
+  3. **`[SEC-05-03]` (`Informational` — Conforme [`VERIFICADO`]): Uso estritamente funcional e efêmero de `sessionStorage` em `useViewportHint.ts`**
+     - **Evidência Técnica:** `src/components/Skills/hooks/useViewportHint.ts` (linhas 24 e 33) lê e grava apenas a chave `"skills_hint_seen": "1"` no `sessionStorage`.
+     - **Impacto:** Nenhum impacto à privacidade; armazena apenas um indicador visual booleano restrito à sessão da aba atual, sem identificadores ou dados pessoais.
+  4. **`[SEC-05-04]` (`Informational` — Conforme [`VERIFICADO`]): Ausência comprovada de formulários, cookies, rastreadores, telemetria de runtime e metadados EXIF sensíveis**
+     - **Evidência Técnica:** Zero `<form>`/`<input>`, zero `document.cookie`/`Set-Cookie`/`localStorage`/`IndexedDB`, zero pacotes ou chamadas de analytics/telemetria no código e nos bundles `.next/static/`, zero source maps públicos (`.map`) e zero coordenadas GPS/dados pessoais nas 14 imagens de `public/images/`.
+- **Status Atual:** **`Validado` na branch local `security/privacy-audit` [`VERIFICADO`] / `PENDENTE` de merge em `integration/security-quality`**.
+- **Branch Responsável:** `security/privacy-audit`
+- **Evidência de Validação:**
+  - `npx tsc --noEmit`: código `0`
+  - `npm run lint`: código `0` (`0 errors, 0 warnings`)
+  - `npm run test:coverage`: código `0` (`33 passed`, `120 passed`, incluindo os 2 novos testes de privacidade em `SharePageButton.test.tsx`; cobertura de `SharePageButton.tsx` subiu para `97.22%` Stmts / `91.3%` Branch / `100%` Funcs / `100%` Lines, e cobertura global subiu para **`98.76%` Stmts / `95.77%` Branch / `100%` Funcs / `100%` Lines**)
+  - `npm run build`: código `0` (rotas `/` e `/_not-found` pré-renderizadas como `○ Static`)
+  - Validação HTTP e em navegador real (`next start` + Google Chrome headless via CDP): `0` cookies, `0` entradas em `localStorage`, `0` violações CSP e `0` requisições externas.
+- **Risco Residual (`RISCO ACEITO`):**
+  1. Exposição intencional dos dados de contato profissional do titular na UI (`[SEC-05-02]` / `ADR-006`).
+  2. Tratamento de logs técnicos de conexão HTTP (endereço IP, `User-Agent`, data/hora) pela infraestrutura de borda do provedor de hospedagem (Vercel) e por plataformas externas quando o visitante decide clicar voluntariamente em links externos (LinkedIn, GitHub, Google Drive, YouTube, Google Colab), os quais operam sob políticas próprias de cada provedor.
 
 ---
 
-### `[SEC-06]` SAST, Detecção de Segredos e Segurança de Links Externos *(anteriormente registrado como SEC-05)*
+### `[SEC-06]` SAST, Detecção de Segredos e Segurança de Links Externos
 - **Severidade:** Nenhuma (Auditoria aprovada sem vulnerabilidades)
 - **Arquivos Auditados:** Todo o diretório `src/**`, histórico Git (`git log -p`) e componentes com links externos (`ContactItem.tsx`, `CurriculumDriveAccess.tsx`, `ExperienceActivityItem.tsx`).
 - **Impacto Potencial:** N/A.

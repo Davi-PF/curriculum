@@ -13,23 +13,23 @@
 1. **Proibição de Injeção de HTML/Script:**
    - É **estritamente proibido** utilizar `dangerouslySetInnerHTML`, `eval()`, `new Function()`, `document.write()` ou `innerHTML` em qualquer componente ou hook.
    - `Status: VERIFICADO` — A auditoria SAST confirmou zero ocorrências dessas APIs em todo o diretório `src/`.
-2. **Manipulação Segura do DOM:**
+2. **Manipulação Segura do DOM e Minimização de URLs Compartilhadas:**
    - Toda renderização de textos (incluindo dados vindos de `src/i18n/` e `src/data/`) deve ocorrer via JSX padrão do React, garantindo escapamento automático contra XSS.
    - O uso de APIs imperativas do navegador deve restringir-se a operações seguras de estado visual/interação:
-     - `window.scrollTo` e `window.scrollY` (`src/components/Header/useHeaderScroll.ts`, `src/components/ScrollToTopButton/ScrollToTopButton.tsx`).
-     - `navigator.share` e `navigator.clipboard.writeText` (`src/components/ShareButton/SharePageButton.tsx`), sempre construindo a URL a partir de `window.location.origin + pathname` (sem refletir parâmetros não confiáveis da query string ou hash).
-     - `IntersectionObserver` (`src/components/ScrollHint/ScrollHint.tsx`).
+     - `window.scrollTo` e `window.scrollY` (`src/components/Header/useHeaderScroll.ts`).
+     - `navigator.share`, `navigator.clipboard.writeText` e fallback `window.prompt` (`src/components/SharePageButton.tsx`), construindo a URL canônica estritamente a partir de `globalThis.location.origin + globalThis.location.pathname` (`getCanonicalPageUrl()`), descartando `search` (query string como `utm_*`, `fbclid`, `gclid`) e `hash` (`#...`) para impedir a propagação involuntária de parâmetros de rastreamento ou fragmentos (`VERIFICADO` — implementado e testado em `SEC-05`).
+     - `IntersectionObserver` e `sessionStorage` efêmero (`src/components/Skills/hooks/useViewportHint.ts`).
 3. **Prevenção de Open Redirect:**
    - O projeto não deve utilizar redirecionamentos baseados em parâmetros de URL (`searchParams`, `window.location.href = param`).
    - `Status: VERIFICADO` — Nenhuma rota ou componente realiza redirecionamento dinâmico baseado em entrada do usuário.
 
 ### Segurança de Links Externos (`target="_blank"`)
-- **Regra Obrigatória:** Todo elemento `<a target="_blank">` que aponte para domínios externos (GitHub, LinkedIn, Google Drive, WhatsApp, certificados, etc.) **deve obrigatoriamente** conter:
-  - Protocolo explícito `https://` (ou esquemas seguros específicos como `mailto:` em links de e-mail).
+- **Regra Obrigatória:** Todo elemento `<a target="_blank">` que aponte para domínios externos (GitHub, LinkedIn, Google Drive, YouTube, Google Colab, etc.) **deve obrigatoriamente** conter:
+  - Protocolo explícito `https://`.
   - Atributo `rel="noopener noreferrer"` para prevenir *Reverse Tabnabbing* e vazamento de referência de janela (`window.opener`).
 - **Estado Atual (`VERIFICADO`):**
   - `src/components/Contact/ContactItem.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
-  - `src/components/CurriculumDriveAccess/CurriculumDriveAccess.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
+  - `src/components/Contact/CurriculumDriveAccess.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
   - `src/components/Experience/ExperienceActivityItem.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
 
 ---
@@ -55,7 +55,7 @@
 
 ### Estado Atual
 - **Base (`SEC-02`):** `Integrado` em `integration/security-quality` via `fbb64d9` / `c872bc0` (`VERIFICADO`).
-- **Auditoria e Refinamento da CSP (`SEC-04`):** `Validado` na branch `security/content-security-policy`, `PENDENTE` de merge em `integration/security-quality` (`VERIFICADO`).
+- **Auditoria e Refinamento da CSP (`SEC-04`):** `Integrado` em `integration/security-quality` via `3428e7f` / `178fce2953a3e3a9444b0c2741322a4ed844d1a3` (`VERIFICADO`).
 
 Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as funções testáveis `buildCspHeader(isDev)` e `getSecurityHeaders(isDev)` (cobertas por testes automatizados em `src/__tests__/nextConfigHeaders.test.ts`) e aplica os cabeçalhos em `source: "/:path*"`.
 
@@ -65,8 +65,8 @@ Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as f
 | `X-Content-Type-Options` | `nosniff` | Impedir *MIME-sniffing* de scripts e folhas de estilo pelo navegador. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
 | `X-Frame-Options` | `DENY` | Prevenir ataques de *Clickjacking* impedindo embutimento em `<frame>`/`<iframe>`. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Enviar apenas a origem em requisições cross-origin HTTPS e omitir em downgrade HTTP. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), browsing-topics=()` | Desabilitar APIs sensíveis do navegador não utilizadas pelo portfólio. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
-| `Content-Security-Policy` (CSP — Produção) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests` | Política de menor privilégio compatível com SSG no Next.js 16.4.5. Na `SEC-04`, foram removidas permissões desnecessárias (`blob:` de `img-src` e `data:` de `font-src`) e adicionada `frame-src 'none'`. | `VERIFICADO` (`Validado` em `security/content-security-policy` / `PENDENTE` de merge) |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), browsing-topics=()` | Desabilitar APIs sensíveis do navegador (câmera, microfone, geolocalização e Google Topics API) não utilizadas pelo portfólio. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `Content-Security-Policy` (CSP — Produção) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests` | Política de menor privilégio compatível com SSG no Next.js 16.4.5. Na `SEC-04`, foram removidas permissões desnecessárias (`blob:` de `img-src` e `data:` de `font-src`) e adicionada `frame-src 'none'`. | `VERIFICADO` (`Integrado` em `integration/security-quality` via `178fce2`) |
 | `Strict-Transport-Security` (HSTS) | Gerenciado pela borda da Vercel em produção (`max-age=63072000; includeSubDomains; preload` ou padrão da plataforma) | Garantir transporte exclusivamente via HTTPS em produção, sem quebrar `http://localhost:3000` em desenvolvimento. | `VERIFICADO` (delegado à Vercel em produção) |
 
 ### Detalhamento Diretiva por Diretiva da CSP (`SEC-04`)
@@ -119,16 +119,27 @@ Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as f
 
 ---
 
-## 5. Privacidade, Dados Pessoais (PII) e Metadados de Arquivos
+## 5. Privacidade, Proteção de Dados (LGPD), Armazenamento e Metadados (`SEC-05`)
 
-### Diretrizes Obrigatórias para Documentação e Agentes
-1. **Não Replicar Dados Pessoais na Documentação Técnica:**
-   - Embora o portfólio exiba formas de contato publicamente na interface, **nenhum documento em `docs/` ou `AGENTS.md` deve copiar o número de telefone ou endereço de e-mail pessoal do autor em texto puro**. Referencie apenas os arquivos de código (`src/components/Contact/Contact.tsx` e `README.md`).
-2. **Exposição de Contato no Código (`RISCO ACEITO`):**
-   - A presença de canais de contato em `src/components/Contact/Contact.tsx` é uma escolha funcional de negócio para recrutadores (`RISCO ACEITO`), documentada em `[SEC-05]` (`08-security-findings-and-risks.md`).
-3. **Currículo em PDF e Google Drive:**
-   - O currículo em PDF não é armazenado dentro do repositório Git; o acesso ocorre por link externo do Google Drive em `src/components/CurriculumDriveAccess/CurriculumDriveAccess.tsx`.
-   - **Recomendação Operacional:** Garantir no Google Drive que o link esteja restrito a *"Qualquer pessoa com o link pode visualizar"* (sem permissão de edição ou listagem de pasta pai) e que os metadados internos do PDF (Autor/Software) contenham apenas informações profissionais desejadas.
-4. **Metadados EXIF de Imagens (`VERIFICADO`):**
-   - Todas as imagens em `public/images/` (incluindo `public/images/profile.jpg`) foram inspecionadas quanto a metadados EXIF.
-   - `Status: VERIFICADO` — Não existem coordenadas GPS, números de série de câmera ou metadados privados sensíveis nos ativos de imagem do repositório. Sempre que uma nova foto for adicionada a `public/images/`, seus metadados EXIF devem ser removidos antes do commit.
+### Estado Atual (`VERIFICADO` / `Validado` em `security/privacy-audit`, `PENDENTE` de merge em `integration/security-quality`)
+
+1. **Ausência de Coleta Direta de Dados Pessoais de Visitantes (`VERIFICADO`):**
+   - A aplicação é um portfólio estático (SSG) sem formulários (`<form>`, `<input>`, `<textarea>`), sem autenticação, sem banco de dados, sem rotas de API e sem envio de informações do visitante para servidores da aplicação ou de terceiros.
+   - A alternância de idioma (`src/contexts/LanguageContext.tsx`) opera exclusivamente em memória (React state) durante a navegação atual.
+2. **Cookies, Web Storage e Ausência de Rastreadores (`VERIFICADO`):**
+   - **Cookies:** Zero uso de `document.cookie` ou cabeçalhos `Set-Cookie`.
+   - **Armazenamento Persistente:** Zero uso de `localStorage`, `IndexedDB`, `Cache API` ou `Service Workers`.
+   - **`sessionStorage` Estritamente Funcional e Efêmero:** O hook `src/components/Skills/hooks/useViewportHint.ts` grava apenas a chave `"skills_hint_seen"` com valor `"1"` no `sessionStorage` para exibir uma única vez por aba a animação visual de dica de clique nas competências. Esse dado não é pessoal, não identifica o visitante e é descartado automaticamente ao fechar a aba.
+   - **Analytics, Pixels e Telemetria de Runtime:** Zero scripts ou SDKs de rastreamento (Google Analytics, GTM, Meta Pixel, `@vercel/analytics`, Hotjar, Sentry, etc.). Além disso, `Permissions-Policy` desabilita explicitamente `browsing-topics=()`, `geolocation=()`, `camera=()` e `microphone=()`, e `Referrer-Policy: strict-origin-when-cross-origin` restringe o envio de URLs completas a origens externas.
+   - **Dispensa Técnica de Banner de Cookies:** Por não existirem cookies nem tecnologias de rastreamento ou armazenamento de dados pessoais, não deve ser adicionado banner/modal de consentimento de cookies (evitando poluição de interface e coleta desnecessária de estado de consentimento).
+3. **Minimização de URL no Compartilhamento (`SharePageButton.tsx` — `SEC-05-01`):**
+   - Quando nenhuma prop `url` customizada é fornecida, `src/components/SharePageButton.tsx` constrói o endereço compartilhado exclusivamente com `origin + pathname` (`getCanonicalPageUrl()`), descartando `location.search` e `location.hash` para evitar a propagação acidental de parâmetros de campanha/rastreamento (`utm_*`, `fbclid`, `gclid`) ou fragmentos presentes na URL do visitante (`VERIFICADO` por testes unitários em `src/__tests__/SharePageButton.test.tsx`).
+4. **Proteção de Dados Pessoais do Titular do Portfólio e Regras para Documentação (`SEC-05-02`):**
+   - Embora o portfólio exiba canais de contato profissional na interface (`src/components/Contact/Contact.tsx` e `README.md`) como escolha funcional de negócio (`RISCO ACEITO` conforme `ADR-006`), **nenhum documento em `docs/` ou `AGENTS.md` deve copiar o número de telefone ou endereço de e-mail pessoal do autor em texto puro**.
+   - Os botões de contato de e-mail e telefone em `Contact.tsx` copiam o valor apenas para a área de transferência local do dispositivo do visitante (`navigator.clipboard.writeText` em `useCopyToast.ts`), sem transmissão de rede.
+5. **Currículo Externo e Links para Plataformas de Terceiros:**
+   - Links para LinkedIn, GitHub, Google Drive (`CurriculumDriveAccess.tsx`), YouTube e Google Colab são acionados exclusivamente por clique voluntário do visitante (`<a target="_blank" rel="noopener noreferrer">`), sem pré-carregamento, iframes ou embeds automáticos.
+6. **Metadados EXIF/tEXt de Imagens e Source Maps (`VERIFICADO`):**
+   - Todas as 14 imagens em `public/images/` foram auditadas em nível binário (`public/images/profile.jpg` não possui segmento EXIF, GPS ou XMP; os ícones PNG possuem apenas metadado genérico de ferramenta `Software=www.inkscape.org` ou timestamp de criação da logo, sem coordenadas GPS, nomes de proprietário ou seriais de dispositivo).
+   - O build de produção não gera arquivos `.map` públicos em `.next/static/` (`0` source maps expostos).
+   - Sempre que uma nova imagem for adicionada a `public/images/`, seus metadados EXIF/GPS devem ser verificados e removidos antes do commit.
