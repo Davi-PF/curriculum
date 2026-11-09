@@ -51,13 +51,13 @@
 
 ---
 
-## 3. Cabeçalhos HTTP de Segurança
+## 3. Cabeçalhos HTTP de Segurança e Content Security Policy (`SEC-02` e `SEC-04`)
 
-### Estado Atual (`VERIFICADO` / `Integrado` em `integration/security-quality` via `fbb64d9` / `c872bc0`)
+### Estado Atual
+- **Base (`SEC-02`):** `Integrado` em `integration/security-quality` via `fbb64d9` / `c872bc0` (`VERIFICADO`).
+- **Auditoria e Refinamento da CSP (`SEC-04`):** `Validado` na branch `security/content-security-policy`, `PENDENTE` de merge em `integration/security-quality` (`VERIFICADO`).
 
-Em `next.config.ts`, a aplicação define `poweredByHeader: false` e `async headers()` aplicando os cabeçalhos de segurança em `source: "/:path*"`.
-
-A tabela abaixo apresenta os controles implementados na branch `security/http-headers` (`fbb64d9`) e integrados em `integration/security-quality` (`c872bc0`):
+Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as funções testáveis `buildCspHeader(isDev)` e `getSecurityHeaders(isDev)` (cobertas por testes automatizados em `src/__tests__/nextConfigHeaders.test.ts`) e aplica os cabeçalhos em `source: "/:path*"`.
 
 | Cabeçalho / Configuração | Valor / Diretiva Configurada | Finalidade Técnica | Status Atual |
 | :--- | :--- | :--- | :--- |
@@ -66,18 +66,35 @@ A tabela abaixo apresenta os controles implementados na branch `security/http-he
 | `X-Frame-Options` | `DENY` | Prevenir ataques de *Clickjacking* impedindo embutimento em `<frame>`/`<iframe>`. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Enviar apenas a origem em requisições cross-origin HTTPS e omitir em downgrade HTTP. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), browsing-topics=()` | Desabilitar APIs sensíveis do navegador não utilizadas pelo portfólio. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
-| `Content-Security-Policy` (CSP) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests` | Mitigar carregamento de recursos externos não autorizados e *clickjacking* (`frame-ancestors 'none'`). **Limitação residual (`RISCO ACEITO`):** `'unsafe-inline'` em `script-src` e `style-src` é uma concessão necessária para preservar a geração estática (SSG) do Next.js App Router sem middleware/nonces dinâmicos, não constituindo proteção completa contra XSS. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
-| `Strict-Transport-Security` (HSTS) | Gerenciado pela borda da Vercel em produção (`max-age=63072000; includeSubDomains; preload` ou padrão da plataforma) | Garantir transporte exclusivamente via HTTPS em produção. Não deve quebrar `http://localhost:3000` em desenvolvimento. | `VERIFICADO` (delegado à Vercel em produção) |
+| `Content-Security-Policy` (CSP — Produção) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; upgrade-insecure-requests` | Política de menor privilégio compatível com SSG no Next.js 16.4.5. Na `SEC-04`, foram removidas permissões desnecessárias (`blob:` de `img-src` e `data:` de `font-src`) e adicionada `frame-src 'none'`. | `VERIFICADO` (`Validado` em `security/content-security-policy` / `PENDENTE` de merge) |
+| `Strict-Transport-Security` (HSTS) | Gerenciado pela borda da Vercel em produção (`max-age=63072000; includeSubDomains; preload` ou padrão da plataforma) | Garantir transporte exclusivamente via HTTPS em produção, sem quebrar `http://localhost:3000` em desenvolvimento. | `VERIFICADO` (delegado à Vercel em produção) |
+
+### Detalhamento Diretiva por Diretiva da CSP (`SEC-04`)
+
+| Diretiva | Origens Autorizadas | Justificativa Técnica e Risco Residual |
+| :--- | :--- | :--- |
+| `default-src` | `'self'` | Fallback restritivo padrão para diretivas de busca não especificadas, limitando qualquer carregamento à própria origem. |
+| `script-src` | `'self' 'unsafe-inline'` *(e `'unsafe-eval'` apenas quando `NODE_ENV === "development"`)* | Autoriza os chunks JS de `'self'` (`/_next/static/chunks/*.js`) e os 6–7 scripts inline de bootstrap/hidratação RSC gerados pelo Next.js 16.4.5 SSG (`self.__next_f.push(...)`). **Risco residual (`RISCO ACEITO`):** `'unsafe-inline'` é necessário porque `next.config.ts` é avaliado antes da geração dos payloads RSC com build ID dinâmico e nonces exigem SSR/Middleware por requisição. Mitigado pela ausência de `'unsafe-eval'` em produção e pela auditoria SAST limpa. |
+| `style-src` | `'self' 'unsafe-inline'` | Autoriza a folha de estilo compilada do Tailwind CSS v4 (`/_next/static/chunks/*.css`), os atributos inline `style="color:transparent"` e posicionamento `fill` injetados pelo componente `next/image` e a tag `<style>` das páginas estáticas `_not-found` e `_global-error`. **Risco residual (`RISCO ACEITO`):** `'unsafe-inline'` em estilos não permite execução de scripts em navegadores modernos. |
+| `img-src` | `'self' data:` | Autoriza imagens otimizadas servidas por `/_next/image`, ícones estáticos (`/favicon.ico`) e URIs `data:image/svg+xml` utilizadas pelo runtime cliente do `next/image` para placeholders. O esquema `blob:` foi removido na `SEC-04` por ausência de uso no projeto. |
+| `font-src` | `'self'` | Autoriza exclusivamente os arquivos `.woff2` auto-hospedados em build-time pelo `next/font/google` sob `/_next/static/media/*.woff2`. O esquema `data:` foi removido na `SEC-04` por ausência de uso no CSS compilado. |
+| `connect-src` | `'self'` | Restringe requisições `fetch`/`XHR` de navegação cliente e manifesto de rotas do Next.js à própria origem. |
+| `object-src` | `'none'` | Bloqueia integralmente elementos legados `<object>`, `<embed>` e `<applet>`. |
+| `base-uri` | `'self'` | Impede injeção de tag `<base>` apontando para domínios externos (prevenção de sequestro de URLs relativas). |
+| `form-action` | `'self'` | Restringe submissões de formulários à própria origem, prevenindo exfiltração via injeção de `<form action="https://...">`. |
+| `frame-ancestors` | `'none'` | Defesa moderna contra *Clickjacking*, proibindo que qualquer página (mesmo da própria origem) incorpore o portfólio em `<frame>`, `<iframe>`, `<embed>` ou `<object>`. |
+| `frame-src` | `'none'` | Adicionada na `SEC-04`: proíbe que a própria página crie ou carregue `<frame>` ou `<iframe>` (inclusive same-origin, que antes seria permitido pelo fallback `default-src 'self'`). |
+| `upgrade-insecure-requests` | *(Diretiva sem valor — ativa apenas fora de `development`)* | Instrui navegadores em produção a converter automaticamente qualquer sub-recurso `http://` para `https://`. Omitida em `development` para não interferir em `http://localhost:3000`. |
 
 ---
 
 ## 4. Segurança de CI/CD e Vercel
 
-### Estado Atual (`VERIFICADO` / `Validado` em `security/github-actions`, `PENDENTE` de merge em `integration/security-quality`)
+### Estado Atual (`VERIFICADO` / `Integrado` em `integration/security-quality` via `15e4cd6` / `aaf71f8`)
 - O arquivo `.github/workflows/build.yml` executa validação completa, scan do SonarCloud e verificação do Quality Gate (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`).
 - **Segredos (`VERIFICADO`):** Não há tokens ou credenciais hardcoded no repositório ou no histórico Git. Os segredos `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_ORGANIZATION_KEY`, `CODECOV_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` são injetados via GitHub Actions Secrets.
 
-### Controles Obrigatórios Implementados em `security/github-actions`
+### Controles Obrigatórios Implementados e Integrados (`SEC-03`)
 1. **Pinning de Actions por SHA de 40 caracteres e Vercel CLI com Versão Exata:**
    - Todas as GitHub Actions são fixadas pelo hash SHA completo de 40 caracteres do commit da release oficial, acompanhado de comentário indicando a versão:
      - `actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`
@@ -108,7 +125,7 @@ A tabela abaixo apresenta os controles implementados na branch `security/http-he
 1. **Não Replicar Dados Pessoais na Documentação Técnica:**
    - Embora o portfólio exiba formas de contato publicamente na interface, **nenhum documento em `docs/` ou `AGENTS.md` deve copiar o número de telefone ou endereço de e-mail pessoal do autor em texto puro**. Referencie apenas os arquivos de código (`src/components/Contact/Contact.tsx` e `README.md`).
 2. **Exposição de Contato no Código (`RISCO ACEITO`):**
-   - A presença de canais de contato em `src/components/Contact/Contact.tsx` é uma escolha funcional de negócio para recrutadores (`RISCO ACEITO`), documentada em `[SEC-04]` (`08-security-findings-and-risks.md`).
+   - A presença de canais de contato em `src/components/Contact/Contact.tsx` é uma escolha funcional de negócio para recrutadores (`RISCO ACEITO`), documentada em `[SEC-05]` (`08-security-findings-and-risks.md`).
 3. **Currículo em PDF e Google Drive:**
    - O currículo em PDF não é armazenado dentro do repositório Git; o acesso ocorre por link externo do Google Drive em `src/components/CurriculumDriveAccess/CurriculumDriveAccess.tsx`.
    - **Recomendação Operacional:** Garantir no Google Drive que o link esteja restrito a *"Qualquer pessoa com o link pode visualizar"* (sem permissão de edição ou listagem de pasta pai) e que os metadados internos do PDF (Autor/Software) contenham apenas informações profissionais desejadas.

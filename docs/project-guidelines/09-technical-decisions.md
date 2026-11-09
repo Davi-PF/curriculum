@@ -12,15 +12,15 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
   1. **Manter Next.js 16 (App Router):** Preservar a estrutura atual, aproveitando `next/image`, `next/font`, geração nativa de `metadata` / `sitemap.ts` / `robots.ts`, configuração declarativa de `headers()` em `next.config.ts` e integração nativa na Vercel.
   2. **Migrar para Vite + React SPA:** Reescrever configuração de build, substituir `next/image` por tags `<img>` manuais, configurar cabeçalhos via `vercel.json` e perder metadados nativos no servidor.
 - **Decisão Tomada:** **Opção 1 — Manter Next.js 16 (App Router).**
-- **Justificativa:** O projeto já está estabilizado em Next.js 16 com 114 testes automatizados (~98.7% de cobertura) e deploy configurado na Vercel. Os benefícios nativos de otimização de imagens (`next/image`), SEO (`Metadata` API) e cabeçalhos HTTP (`next.config.ts`) superam o custo e o risco de reescrever a camada de build.
-- **Impacto Técnico:** As melhorias de performance (`perf/image-font-optimization`), segurança (`security/http-headers`) e SEO (`feat/accessibility-seo`) devem utilizar os recursos nativos do Next.js 16.
+- **Justificativa:** O projeto já está estabilizado em Next.js 16 com suíte de testes automatizados (~98.7% de cobertura) e deploy configurado na Vercel. Os benefícios nativos de otimização de imagens (`next/image`), SEO (`Metadata` API) e cabeçalhos HTTP (`next.config.ts`) superam o custo e o risco de reescrever a camada de build.
+- **Impacto Técnico:** As melhorias de performance (`perf/image-font-optimization`), segurança (`security/http-headers`, `security/content-security-policy`) e SEO (`feat/accessibility-seo`) devem utilizar os recursos nativos do Next.js 16.
 
 ---
 
 ## ADR-002: Adoção da Branch Intermediária `integration/security-quality`
 
 - **Data:** 2026-11-09 (`VERIFICADO`)
-- **Contexto:** A auditoria identificou melhorias distribuídas em 7 frentes distintas (dependências, cabeçalhos HTTP, GitHub Actions, bugs funcionais, performance de ativos, acessibilidade/SEO e limpeza de projeto), além da criação deste Playbook. Integrar cada frente diretamente em `master` acionaria deploys de produção parciais e dificultaria testes integrados do conjunto.
+- **Contexto:** A auditoria identificou melhorias distribuídas em frentes distintas (dependências, cabeçalhos HTTP, GitHub Actions, CSP, bugs funcionais, performance de ativos, acessibilidade/SEO e limpeza de projeto), além da criação deste Playbook. Integrar cada frente diretamente em `master` acionaria deploys de produção parciais e dificultaria testes integrados do conjunto.
 - **Opções Avaliadas:**
   1. Fazer merge de cada branch temática diretamente em `master`.
   2. Implementar todas as melhorias em uma única branch monolítica.
@@ -37,10 +37,10 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
 - **Contexto:** Alterações de dependências (`package-lock.json`), regras de segurança (`next.config.ts`), pipelines de CI (`.github/workflows/build.yml`) e componentes React (`src/components/`) possuem perfis de risco e requisitos de validação muito diferentes.
 - **Opções Avaliadas:**
   1. Agrupar todas as correções de segurança em uma branch e todas as de código em outra.
-  2. Segregar em branches granulares por domínio técnico (`docs/project-playbook`, `security/dependency-updates`, `security/http-headers`, `security/github-actions`, `fix/functional-bugs`, `perf/image-font-optimization`, `feat/accessibility-seo`, `chore/project-cleanup`).
+  2. Segregar em branches granulares por domínio técnico (`docs/project-playbook`, `security/dependency-updates`, `security/http-headers`, `security/github-actions`, `security/content-security-policy`, `fix/functional-bugs`, `perf/image-font-optimization`, `feat/accessibility-seo`, `chore/project-cleanup`).
 - **Decisão Tomada:** **Opção 2 — Segregação em branches granulares por domínio.**
-- **Justificativa:** Facilita o code review humano, isola eventuais regressões (ex.: se uma diretiva CSP bloquear um recurso, é simples auditar apenas `security/http-headers`) e mantém o histórico Git limpo e rastreável.
-- **Impacto Técnico:** É proibido corrigir problemas de uma branch dentro de outra (ex.: não remover código morto durante a implementação de cabeçalhos HTTP).
+- **Justificativa:** Facilita o code review humano, isola eventuais regressões (ex.: se uma diretiva CSP bloquear um recurso, é simples auditar apenas a branch correspondente) e mantém o histórico Git limpo e rastreável.
+- **Impacto Técnico:** É proibido corrigir problemas de uma branch dentro de outra (ex.: não remover código morto durante a implementação de cabeçalhos HTTP ou CSP).
 
 ---
 
@@ -97,3 +97,22 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
   2. O deploy (`deploy_vercel`) depende da aprovação integral do job `ci` (`needs: ci`), incluindo a aprovação do Quality Gate.
   3. A execução em `master` avalia o commit efetivamente recebido pela branch antes de liberar o deploy de produção, enquanto evita bloqueios desnecessários em pushes intermediários para `dev` e `integration/security-quality`.
 - **Impacto Técnico:** Qualquer atualização futura de GitHub Actions em `.github/workflows/build.yml` deve consultar o commit SHA dereferenciado (`^{}`) da release oficial via `git ls-remote` e manter o comentário da versão correspondente.
+
+---
+
+## ADR-008: Auditoria e Refinamento da Content Security Policy (CSP) Estática Compatível com Next.js App Router (SSG)
+
+- **Data:** 2026-11-09 (`VERIFICADO`)
+- **Contexto:** Durante a auditoria técnica dedicada de Content Security Policy (`SEC-04`), inspecionaram-se os artefatos reais gerados pelo Next.js 16.4.5 (`.next/server/app/index.html`, `_not-found.html`, `_global-error.html` e chunks CSS/JS em `.next/static/`) para verificar a viabilidade de eliminar `'unsafe-inline'` via nonces ou hashes SHA-256, avaliar `Content-Security-Policy-Report-Only` e eliminar permissões excessivas ou diretivas ausentes na CSP introduzida na `SEC-02`.
+- **Opções Avaliadas:**
+  1. **CSP Dinâmica com Nonces (`'nonce-...'` via `middleware.ts` / SSR):** Gerar um nonce por requisição HTTP e forçar renderização dinâmica em todas as rotas.
+  2. **CSP Estática com Hashes SHA-256 (`'sha256-...'`) sem `'unsafe-inline'`:** Tentar listar hashes estáticos no cabeçalho HTTP em `next.config.ts`.
+  3. **Substituir a CSP de bloqueio por `Content-Security-Policy-Report-Only`:** Operar apenas em modo de observação sem bloqueio efetivo.
+  4. **Manter CSP em Modo de Bloqueio (`Content-Security-Policy`) com Refinamento de Menor Privilégio Compatível com SSG:** Adicionar `frame-src 'none'`, remover esquemas não utilizados (`blob:` de `img-src` e `data:` de `font-src`), manter `'unsafe-eval'` restrito exclusivamente a `development`, preservar `'unsafe-inline'` em `script-src` e `style-src` como concessão documentada para SSG e instituir testes unitários automatizados (`src/__tests__/nextConfigHeaders.test.ts`).
+- **Decisão Tomada:** **Opção 4 — CSP em modo de bloqueio com menor privilégio estrito compatível com SSG e validação automatizada.**
+- **Justificativa:**
+  1. **Inviabilidade de Nonces em SSG:** Nonces exigem geração por requisição via Middleware e desativam a geração estática (`○ Static`), contrariando a arquitetura do portfólio (`ADR-001`).
+  2. **Inviabilidade de Hashes SHA-256 em `next.config.ts`:** O Next.js 16.4.5 App Router injeta 6 scripts inline em `index.html` e `_not-found.html` (`self.__next_f.push(...)`) contendo nomes de chunks e build ID gerados durante a compilação, enquanto `next.config.ts` (`headers()`) é avaliado antes da geração dos arquivos HTML. Além disso, `next/image` e `_not-found.html` injetam atributos HTML `style="..."` que não suportam nonces individuais.
+  3. **Inadequação de `Report-Only` isolado:** Sem um endpoint externo coletor de relatórios (`report-uri`/`report-to`), substituir `Content-Security-Policy` por `Content-Security-Policy-Report-Only` apenas desativaria a proteção ativa no navegador, enfraquecendo a política anterior.
+  4. **Redução efetiva da superfície de ataque:** A remoção de `blob:` em `img-src`, a remoção de `data:` em `font-src` e a adição de `frame-src 'none'` eliminam permissões desnecessárias sem afetar nenhum recurso legítimo do portfólio.
+- **Impacto Técnico:** As funções `buildCspHeader(isDev)` e `getSecurityHeaders(isDev)` em `next.config.ts` são verificadas automaticamente pela suíte `src/__tests__/nextConfigHeaders.test.ts` em toda execução do Vitest e na pipeline de CI.
