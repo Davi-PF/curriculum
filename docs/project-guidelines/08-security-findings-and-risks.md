@@ -3,7 +3,7 @@
 > **Legenda de Status de Ciclo de Vida:**
 > - `Identificado`: Problema comprovado na auditoria sobre `e56f30f`, aguardando início da implementação na branch responsável.
 > - `Validado`: Correção implementada e validada com testes/build/audit na branch temática local, aguardando aprovação para merge em `integration/security-quality`.
-> - `Integrado`: Correção já mesclada em `integration/security-quality` (nenhuma branch temática foi mesclada até o momento).
+> - `Integrado`: Correção validada e já mesclada em `integration/security-quality`.
 > - `Aceito como risco residual`: Risco avaliado e aceito com justificativa técnica ou de negócio.
 >
 > **Marcadores de Precisão:** `VERIFICADO` | `PENDENTE` | `PLANEJADO` | `RISCO ACEITO`
@@ -16,10 +16,10 @@
 - **Severidade:** Crítica / Alta (em `e56f30f`) -> Reduzida para Moderada apenas em `devDependencies` (em `5f0cf3f`)
 - **Arquivos / Dependências Afetadas:** `package.json`, `package-lock.json` (`next@16.1.6`, `eslint-config-next@16.1.1`, `vitest@4.0.17`, `@vitest/ui@4.0.17`, `@vitest/coverage-v8@4.0.17`, `vite`, `undici`, `flatted`, `picomatch`, `postcss`, `sharp`, `zod`, `js-yaml`, `brace-expansion`).
 - **Impacto Potencial:** Negação de serviço (DoS/ReDoS), *HTTP Request/Response Smuggling* em `undici`, *Prototype Pollution* / recursão descontrolada em `flatted`, *Path Traversal* / leitura arbitrária de arquivos no servidor de dev do `vite` e vulnerabilidades no App Router/Image Optimization do `next@16.1.6`.
-- **Status Atual:** **`Validado` na branch local `security/dependency-updates` (`5f0cf3f`) [`VERIFICADO`] / `PENDENTE` de merge em `integration/security-quality`**.
+- **Status Atual:** **`Integrado` em `integration/security-quality` (`5f0cf3f` / merge `f4cfae2`) [`VERIFICADO`]**.
 - **Branch Responsável:** `security/dependency-updates`
 - **Medida Corretiva Adotada:** Atualização de `next` e `eslint-config-next` para `16.4.5`, suíte `vitest` para `4.1.12` (com `vite@8.3.7`) e atualização de dependências transitivas compatíveis.
-- **Evidência de Validação (`5f0cf3f`):**
+- **Evidência de Validação (`5f0cf3f` / `f4cfae2`):**
   - `npx tsc --noEmit`: código `0`
   - `npm run lint`: código `0`
   - `npm run test:coverage`: `32 passed` (114 testes), `98.72%` statements
@@ -33,11 +33,16 @@
 - **Severidade:** Média
 - **Arquivos Afetados:** `next.config.ts`
 - **Impacto Potencial:** Ausência de defesa em profundidade contra *Clickjacking* (falta de `X-Frame-Options` e `frame-ancestors`), *MIME-sniffing* (falta de `X-Content-Type-Options: nosniff`), injeção de scripts/estilos de terceiros (falta de `Content-Security-Policy`), vazamento excessivo de URL de referência (falta de `Referrer-Policy`), uso indevido de APIs de hardware (falta de `Permissions-Policy`) e exposição desnecessária do cabeçalho `X-Powered-By: Next.js`.
-- **Status Atual:** **`Identificado` [`VERIFICADO` em auditoria] / `PENDENTE` de implementação**.
-- **Branch Responsável:** `security/http-headers` (`PLANEJADO`)
-- **Medida Corretiva Planejada:** Configurar `poweredByHeader: false` e função `async headers()` em `next.config.ts` aplicando `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` e `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`.
-- **Evidência de Validação:** A ser comprovada na branch `security/http-headers` via `npm run build`, `npm run start` e inspeção dos cabeçalhos HTTP de resposta (`HEAD http://localhost:3000`).
-- **Risco Residual:** Uso de `'unsafe-inline'` em `script-src` e `style-src` na CSP estática é requerido pelo modelo de geração estática (SSG) do Next.js App Router quando nonces dinâmicos por requisição não são utilizados.
+- **Status Atual:** **`Integrado` em `integration/security-quality` (`fbb64d9` / merge `c872bc0`) [`VERIFICADO`]**.
+- **Branch Responsável:** `security/http-headers`
+- **Medida Corretiva Adotada:** Configuração de `poweredByHeader: false` e função `async headers()` em `next.config.ts` (`source: "/:path*"`) aplicando `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` e `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`, preservando integralmente a arquitetura estática (SSG).
+- **Evidência de Validação (`fbb64d9` / `c872bc0`):**
+  - `npx tsc --noEmit`: código `0`
+  - `npm run lint`: código `0`
+  - `npm run test:coverage`: `32 passed` (114 testes), `98.72%` statements
+  - `npm run build`: código `0` (rotas `/` e `/_not-found` geradas como `○ Static`)
+  - Inspeção HTTP e validação em navegador real (Google Chrome via CDP contra `next start`): confirmação dos 5 cabeçalhos e ausência de `X-Powered-By` nas rotas `/` (`200`) e `/rota-inexistente-404` (`404`), com `0` violações `securitypolicyviolation`, `0` falhas de rede em 33 recursos, `12/12` imagens e `13` faces de fonte carregadas e todas as interações (troca PT/EN, abas de experiência, modal de skills e cópia de contato) funcionando sem erros.
+- **Risco Residual (`RISCO ACEITO`):** O uso de `'unsafe-inline'` em `script-src` e `style-src` na CSP estática é uma concessão de segurança necessária para preservar a geração estática (SSG) do Next.js App Router sem middleware ou nonces dinâmicos por requisição, **não constituindo proteção completa contra XSS**. Mitigado complementarmente pela ausência comprovada de XSS/manipulação insegura do DOM na auditoria SAST (`[SEC-05]`).
 
 ---
 

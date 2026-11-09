@@ -36,9 +36,9 @@ Antes de realizar qualquer alteração ou propor código, leia obrigatoriamente 
 
 ## Contexto da Tarefa Atual
 - **Branch base de integração:** `integration/security-quality`
-- **Branch de trabalho desta tarefa:** `[ex.: security/http-headers]`
-- **Objetivo / Escopo exclusivo:** `[ex.: Implementar os cabeçalhos HTTP de segurança e poweredByHeader: false conforme SEC-02]`
-- **Arquivos permitidos no escopo:** `[ex.: next.config.ts e testes/configurações diretamente relacionados]`
+- **Branch de trabalho desta tarefa:** `[ex.: security/github-actions]`
+- **Objetivo / Escopo exclusivo:** `[ex.: Hardening do workflow do GitHub Actions e configurações de qualidade conforme SEC-03 e CI-01..03]`
+- **Arquivos permitidos no escopo:** `[ex.: .github/workflows/build.yml, eslint.config.mjs, sonar-project.properties]`
 
 ## Regras Obrigatórias desta Sessão
 1. Inspecione primeiro `git status`, `git branch -a -vv` e `git log --oneline -n 5`.
@@ -59,14 +59,19 @@ Antes de realizar qualquer alteração ou propor código, leia obrigatoriamente 
 
 ## 3. Fotografia do Estado Atual para a Próxima Sessão (`VERIFICADO` em 2026-11-09)
 
-Caso uma nova conversa seja iniciada imediatamente após a criação deste Playbook, o estado exato do repositório é:
+O estado exato do repositório após a integração de `[SEC-01]`, do Playbook e de `[SEC-02]` é:
 
 - **Branch `master`:** Intacta no commit `e56f30f` (`[origin/master]`).
-- **Branch `integration/security-quality`:** Posicionada em `e56f30f` (`[origin/integration/security-quality]`).
-- **Branch `security/dependency-updates`:** Implementada e validada localmente no commit `5f0cf3f` (`[SEC-01]` concluído e aprovado pelo usuário para integração, aguardando execução do merge em `integration/security-quality`).
-- **Branch `docs/project-playbook`:** Contém a criação completa de `AGENTS.md` e `docs/project-guidelines/01..10`, aguardando aprovação e merge em `integration/security-quality`.
-- **Próxima tarefa técnica da fila (após integrar `docs/project-playbook` e `security/dependency-updates` em `integration/security-quality`):**
-  - Criar a branch `security/http-headers` a partir de `integration/security-quality` atualizada e implementar `[SEC-02]` (`Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` e `poweredByHeader: false` em `next.config.ts`).
+- **Branch `integration/security-quality`:** Contém as integrações validadas de:
+  - `security/dependency-updates` (`5f0cf3f`) — `[SEC-01]` (`Integrado`)
+  - `docs/project-playbook` (`2ec4e1b`) — Playbook Técnico e de Segurança (`Integrado`)
+  - `security/http-headers` (`fbb64d9`, merge `c872bc0`) — `[SEC-02]` Cabeçalhos HTTP e `poweredByHeader: false` (`Integrado`)
+- **Próximas branches temáticas pendentes na fila (a criar a partir de `integration/security-quality`):**
+  1. `security/github-actions`: implementar `[SEC-03]` e `CI-01..03` (hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` em `eslint.config.mjs` e correção de duplicidade em `sonar-project.properties`).
+  2. `fix/functional-bugs`: implementar `BUG-01` e `BUG-02` (`ExperienceActivityItem.tsx` e `ActivityLink.ts`).
+  3. `perf/image-font-optimization`: implementar `PERF-01..04`.
+  4. `feat/accessibility-seo`: implementar `A11Y-01..05` e `SEO-01..02`.
+  5. `chore/project-cleanup`: implementar `CLEAN-01..05`.
 
 ---
 

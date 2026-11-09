@@ -1,7 +1,7 @@
 # Playbook Técnico, de Segurança e Continuidade do Projeto
 
 - **Última revisão:** `2026-11-09`
-- **Situação da documentação:** `Completa` (`VERIFICADO` contra o commit `e56f30f` em `integration/security-quality` e branch local `security/dependency-updates` @ `5f0cf3f`)
+- **Situação da documentação:** `Completa` (`VERIFICADO` contra `integration/security-quality` após integração de `security/dependency-updates` @ `5f0cf3f`, `docs/project-playbook` @ `2ec4e1b` e `security/http-headers` @ `fbb64d9`)
 
 ---
 

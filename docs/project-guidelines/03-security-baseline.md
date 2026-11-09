@@ -1,7 +1,7 @@
 # 03. Baseline de Segurança do Projeto
 
 > **Classificação de Status neste Documento:**
-> - `VERIFICADO`: Controle ou estado auditado e comprovado no código-fonte atual (`e56f30f` / `5f0cf3f`).
+> - `VERIFICADO`: Controle ou estado auditado e comprovado no código-fonte atual (`integration/security-quality`).
 > - `PENDENTE`: Controle planejado para implementação em branch específica, ainda não integrado em `integration/security-quality`.
 > - `RISCO ACEITO`: Exposição intencional ou limitação técnica documentada e aceita com justificativa.
 
@@ -43,8 +43,8 @@
    - Priorizar atualizações `patch` e `minor` compatíveis com a árvore atual (`Next.js 16`, `React 19`, `Vitest 4`, `Tailwind CSS 4`).
    - **Proibição de `--force` cego:** Nunca executar `npm audit fix --force` quando a resolução proposta pelo npm fizer downgrade de pacotes principais para versões majors anteriores incompatíveis (ex.: rebaixar `eslint-config-next` de `16.x` para `15.x`).
 3. **Estado Atual das Dependências:**
-   - Em `master` e `integration/security-quality` (`e56f30f`): **`PENDENTE` de integração** (29 vulnerabilidades reportadas pelo `npm audit`: 4 críticas, 12 altas, 12 moderadas, 1 baixa).
-   - Na branch `security/dependency-updates` (`5f0cf3f`): **`VERIFICADO` / `Validado` localmente**, aguardando aprovação para merge em `integration/security-quality`. Reduziu de 29 para **8 vulnerabilidades moderadas** (100% das vulnerabilidades críticas, altas e de runtime de produção corrigidas).
+   - Em `master` (`e56f30f`): **`PENDENTE` de integração final** (29 vulnerabilidades reportadas pelo `npm audit`: 4 críticas, 12 altas, 12 moderadas, 1 baixa).
+   - Em `integration/security-quality` (integrado a partir de `security/dependency-updates` @ `5f0cf3f` no merge `f4cfae2`): **`VERIFICADO` / `Integrado`**. Reduziu de 29 para **8 vulnerabilidades moderadas** (100% das vulnerabilidades críticas, altas e de runtime de produção corrigidas).
 4. **Critério para Aceite Temporário de Risco Residual (`RISCO ACEITO`):**
    - Vulnerabilidades presentes **exclusivamente em `devDependencies`** (como linters ou ferramentas de teste que não integram o bundle de produção nem executam no servidor Next.js) e cuja correção imediata exija downgrade incompatível de major version podem ser documentadas como risco residual temporário até que a cadeia upstream publique atualização compatível.
    - Veja detalhes do caso `minimatch` em `07-dependency-management.md` e `08-security-findings-and-risks.md`.
@@ -53,20 +53,20 @@
 
 ## 3. Cabeçalhos HTTP de Segurança
 
-### Estado Atual (`VERIFICADO` em `e56f30f`) vs. Controles Planejados (`PENDENTE` em `security/http-headers`)
+### Estado Atual (`VERIFICADO` / `Integrado` em `integration/security-quality` via `fbb64d9` / `c872bc0`)
 
-Atualmente, `next.config.ts` configura apenas `images: { qualities: [75, 100] }`. A resposta HTTP da aplicação local (`next start`) expõe `X-Powered-By: Next.js` e não envia cabeçalhos defensivos customizados.
+Em `next.config.ts`, a aplicação define `poweredByHeader: false` e `async headers()` aplicando os cabeçalhos de segurança em `source: "/:path*"`.
 
-A tabela abaixo define os requisitos obrigatórios a serem implementados na branch `security/http-headers`:
+A tabela abaixo apresenta os controles implementados na branch `security/http-headers` (`fbb64d9`) e integrados em `integration/security-quality` (`c872bc0`):
 
-| Cabeçalho / Configuração | Valor / Diretiva Requerida | Finalidade Técnica | Status Atual |
+| Cabeçalho / Configuração | Valor / Diretiva Configurada | Finalidade Técnica | Status Atual |
 | :--- | :--- | :--- | :--- |
-| `poweredByHeader` (`next.config.ts`) | `false` | Ocultar o cabeçalho `X-Powered-By: Next.js` para reduzir *fingerprinting* da stack. | `PENDENTE` (`security/http-headers`) |
-| `X-Content-Type-Options` | `nosniff` | Impedir *MIME-sniffing* de scripts e folhas de estilo pelo navegador. | `PENDENTE` (`security/http-headers`) |
-| `X-Frame-Options` | `DENY` (ou `SAMEORIGIN`) | Prevenir ataques de *Clickjacking* impedindo embutimento em `<frame>`/`<iframe>`. | `PENDENTE` (`security/http-headers`) |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | Enviar apenas a origem em requisições cross-origin HTTPS e omitir em downgrade HTTP. | `PENDENTE` (`security/http-headers`) |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), browsing-topics=()` | Desabilitar APIs sensíveis do navegador não utilizadas pelo portfólio. | `PENDENTE` (`security/http-headers`) |
-| `Content-Security-Policy` (CSP) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;` | Mitigar XSS, injeção de recursos externos e *clickjacking* (`frame-ancestors 'none'`). Nota: Next.js App Router requer `'unsafe-inline'` para scripts de hidratação estática quando nonces dinâmicos por requisição (SSR forçado) não são usados. | `PENDENTE` (`security/http-headers`) |
+| `poweredByHeader` (`next.config.ts`) | `false` | Ocultar o cabeçalho `X-Powered-By: Next.js` para reduzir *fingerprinting* da stack. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `X-Content-Type-Options` | `nosniff` | Impedir *MIME-sniffing* de scripts e folhas de estilo pelo navegador. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `X-Frame-Options` | `DENY` | Prevenir ataques de *Clickjacking* impedindo embutimento em `<frame>`/`<iframe>`. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Enviar apenas a origem em requisições cross-origin HTTPS e omitir em downgrade HTTP. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), browsing-topics=()` | Desabilitar APIs sensíveis do navegador não utilizadas pelo portfólio. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
+| `Content-Security-Policy` (CSP) | `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests` | Mitigar carregamento de recursos externos não autorizados e *clickjacking* (`frame-ancestors 'none'`). **Limitação residual (`RISCO ACEITO`):** `'unsafe-inline'` em `script-src` e `style-src` é uma concessão necessária para preservar a geração estática (SSG) do Next.js App Router sem middleware/nonces dinâmicos, não constituindo proteção completa contra XSS. | `VERIFICADO` (`Integrado` em `integration/security-quality`) |
 | `Strict-Transport-Security` (HSTS) | Gerenciado pela borda da Vercel em produção (`max-age=63072000; includeSubDomains; preload` ou padrão da plataforma) | Garantir transporte exclusivamente via HTTPS em produção. Não deve quebrar `http://localhost:3000` em desenvolvimento. | `VERIFICADO` (delegado à Vercel em produção) |
 
 ---
