@@ -81,3 +81,16 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
 - **Decisão Tomada:** **Opção 2 — Manter na UI do portfólio como risco de negócio aceito e higienizar a documentação técnica.**
 - **Justificativa:** A finalidade principal do portfólio é permitir contato rápido e sem fricção por recrutadores. Ao mesmo tempo, evitar repetir PII em arquivos de documentação e prompts reduz a propagação desnecessária desses dados em contextos de IA e logs.
 - **Impacto Técnico:** Nenhum arquivo em `docs/` ou `AGENTS.md` deve conter o telefone ou e-mail pessoal em texto puro.
+
+---
+
+## ADR-007: Hardening do GitHub Actions — Deploy Exclusivo via `push` em `master` Condicionado à CI e Pinning por SHA
+
+- **Data:** 2026-11-09 (`VERIFICADO`)
+- **Contexto:** O workflow original (`.github/workflows/build.yml`) disparava o deploy de produção no fechamento de PR (`pull_request: closed`) sem exigir `needs: ci`, concedia permissões de escrita no `GITHUB_TOKEN`, usava tags mutáveis nas Actions e instalava `vercel` sem versão fixa.
+- **Opções Avaliadas:**
+  1. Manter o deploy atrelado ao evento `pull_request: closed` e apenas fixar versões.
+  2. Acionar o deploy exclusivamente em eventos `push` na branch `master` (`github.event_name == 'push' && github.ref == 'refs/heads/master'`), com `needs: ci`, `permissions: contents: read` por padrão (sem nenhuma permissão de escrita no `GITHUB_TOKEN`), todas as Actions fixadas por SHA de 40 caracteres e Vercel CLI com versão exata (`vercel@65.14.0`).
+- **Decisão Tomada:** **Opção 2 — Deploy exclusivo via `push` na `master` condicionado a `needs: ci`, menor privilégio estrito e Pinning por SHA de 40 caracteres.**
+- **Justificativa:** Garante que nenhum código chegue à produção sem que o commit exato da `master` tenha passado por TypeScript, ESLint, testes com cobertura, build SSG e SonarCloud na própria execução da pipeline, além de eliminar riscos de *Supply Chain* por tags mutáveis ou versões flutuantes da CLI.
+- **Impacto Técnico:** Qualquer atualização futura de GitHub Actions em `.github/workflows/build.yml` deve consultar o commit SHA dereferenciado (`^{}`) da release oficial via `git ls-remote` e manter o comentário da versão correspondente.

@@ -1,8 +1,8 @@
 # 03. Baseline de Segurança do Projeto
 
 > **Classificação de Status neste Documento:**
-> - `VERIFICADO`: Controle ou estado auditado e comprovado no código-fonte atual (`integration/security-quality`).
-> - `PENDENTE`: Controle planejado para implementação em branch específica, ainda não integrado em `integration/security-quality`.
+> - `VERIFICADO`: Controle ou estado auditado e comprovado no código-fonte atual.
+> - `PENDENTE`: Controle implementado em branch temática e aguardando merge em `integration/security-quality`, ou planejado para etapa futura.
 > - `RISCO ACEITO`: Exposição intencional ou limitação técnica documentada e aceita com justificativa.
 
 ---
@@ -73,20 +73,31 @@ A tabela abaixo apresenta os controles implementados na branch `security/http-he
 
 ## 4. Segurança de CI/CD e Vercel
 
-### Estado Atual (`VERIFICADO` em `.github/workflows/build.yml`)
-- O arquivo `.github/workflows/build.yml` executa testes e scan do SonarCloud (`ci`), seguidos de deploy via Vercel CLI (`deploy_preview` e `deploy_production`).
-- **Segredos (`VERIFICADO`):** Não há tokens ou credenciais hardcoded no repositório ou no histórico Git. Os segredos `SONAR_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` são injetados via GitHub Actions Secrets.
+### Estado Atual (`VERIFICADO` / `Validado` em `security/github-actions`, `PENDENTE` de merge em `integration/security-quality`)
+- O arquivo `.github/workflows/build.yml` executa validação completa e scan do SonarCloud (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`).
+- **Segredos (`VERIFICADO`):** Não há tokens ou credenciais hardcoded no repositório ou no histórico Git. Os segredos `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_ORGANIZATION_KEY`, `CODECOV_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` são injetados via GitHub Actions Secrets.
 
-### Fragilidades Identificadas e Requisitos para `security/github-actions` (`PENDENTE`)
-1. **Pinning de Actions e CLI:**
-   - **Problema atual:** Uso de tags mutáveis (`actions/checkout@v6`, `actions/setup-node@v6`, `SonarSource/sonarqube-scan-action@v5`, `actions/upload-artifact@v4`) e instalação não fixada `npm i -g vercel` (sem versão).
-   - **Requisito:** Fixar versão explícita da Vercel CLI (ou usar SHA/versão imutável) e restringir tags de terceiros para mitigar riscos de *Supply Chain*.
-2. **Menor Privilégio no `GITHUB_TOKEN`:**
-   - **Problema atual:** A permissão de nível de workflow concede `contents: read`, `pull-requests: read`, `checks: write` e `issues: write` para todos os eventos, inclusive `push`.
-   - **Requisito:** Declarar `permissions: contents: read` por padrão no topo do workflow e restringir permissões adicionais apenas aos jobs que realmente necessitem.
-3. **Quality Gate Completo no CI:**
-   - **Problema atual:** O job `ci` executa apenas `npm run test:ci`, sem rodar `npx tsc --noEmit`, `npm run lint` e `npm run build` antes dos jobs de deploy.
-   - **Requisito:** Incluir verificação de tipos, lint e build no job `ci` como pré-condição obrigatória para `deploy_preview` e `deploy_production`.
+### Controles Obrigatórios Implementados em `security/github-actions`
+1. **Pinning de Actions por SHA de 40 caracteres e Vercel CLI com Versão Exata:**
+   - Todas as GitHub Actions são fixadas pelo hash SHA completo de 40 caracteres do commit da release oficial, acompanhado de comentário indicando a versão:
+     - `actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`
+     - `actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0`
+     - `SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0`
+     - `SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1`
+     - `codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5`
+   - **Critério de Manutenção de SHAs:** Ao atualizar qualquer Action no futuro, verificar obrigatoriamente o commit dereferenciado da tag oficial via `git ls-remote https://github.com/<owner>/<repo>.git "refs/tags/<tag>*"` (usando sempre o hash `^{}` quando a tag for anotada) e atualizar o comentário da versão.
+   - **Vercel CLI:** Fixada em `npm i -g vercel@65.14.0` (sem uso de `latest` flutuante).
+2. **Menor Privilégio no `GITHUB_TOKEN` (Zero Permissões de Escrita):**
+   - Padrão global no topo do workflow: `permissions: contents: read`.
+   - Job `ci`: `contents: read` e `pull-requests: read` (nenhuma permissão `write` no `GITHUB_TOKEN`).
+   - Job `deploy_vercel`: estritamente `contents: read`.
+3. **Estratégia Segura de Deploy Condicionada à CI:**
+   - O deploy de produção (`deploy_vercel`) exige `needs: ci` e executa **exclusivamente** quando `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`.
+   - Foi removido o gatilho `pull_request: closed` para deploy, impedindo qualquer publicação em produção sem aprovação prévia do job `ci` sobre o commit da `master`.
+4. **Quality Gate Completo no Job `ci`:**
+   - O job `ci` executa sequencialmente `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage` e `npm run build` antes do scan do SonarCloud e upload do Codecov.
+   - Em `eslint.config.mjs`, `"coverage/**"` está incluído em `globalIgnores`, garantindo `0 warnings` mesmo quando o lint roda após `test:coverage`.
+   - Em `sonar-project.properties`, `sonar.cpd.exclusions` está unificada em uma única declaração contemplando `src/i18n/**`, `src/data/**` e `src/__tests__/**`.
 
 ---
 

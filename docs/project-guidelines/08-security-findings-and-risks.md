@@ -46,17 +46,28 @@
 
 ---
 
-### `[SEC-03]` Fragilidades de Supply Chain e Permissões no Workflow do GitHub Actions
+### `[SEC-03]` Fragilidades de Supply Chain, Permissões e Estratégia de Deploy no GitHub Actions
 - **Severidade:** Média / Baixa
 - **Arquivos Afetados:** `.github/workflows/build.yml`
 - **Impacto Potencial:**
-  1. O comando `npm i -g vercel` instala sempre a versão mais recente sem fixação de versão, expondo os jobs de deploy (que detêm `VERCEL_TOKEN`) a alterações inesperadas ou comprometimento de supply chain.
-  2. Uso de tags mutáveis (`@v4`, `@v5`, `@v6`) nas actions.
-  3. Permissões `checks: write` e `issues: write` concedidas globalmente em todos os eventos, inclusive `push`.
-- **Status Atual:** **`Identificado` [`VERIFICADO` em auditoria] / `PENDENTE` de implementação**.
-- **Branch Responsável:** `security/github-actions` (`PLANEJADO`)
-- **Medida Corretiva Planejada:** Restringir `permissions` por job seguindo o princípio do menor privilégio, fixar versão determinística do pacote `vercel` CLI e adicionar verificações de `lint`, `tsc --noEmit` e `build` no job `ci`.
-- **Evidência de Validação:** A ser validada na branch `security/github-actions`.
+  1. Instalação não fixada `npm i -g vercel` expunha os jobs de deploy (que detêm `VERCEL_TOKEN`) a versões não testadas ou comprometimento de supply chain.
+  2. Uso de tags mutáveis (`@v4`, `@v5`, `@v6`, `@v1`) nas GitHub Actions.
+  3. Permissões excessivas de escrita (`pull-requests: write`, `checks: write`, `statuses: write`) no `GITHUB_TOKEN` sem padrão global restritivo.
+  4. Acionamento de deploy em `pull_request: closed` sem dependência formal (`needs: ci`) sobre o commit da `master`.
+- **Status Atual:** **`Validado` na branch local `security/github-actions` [`VERIFICADO`] / `PENDENTE` de merge em `integration/security-quality`**.
+- **Branch Responsável:** `security/github-actions`
+- **Medida Corretiva Adotada:**
+  1. Definido `permissions: contents: read` como padrão global do workflow; no job `ci`, restrito apenas a `contents: read` e `pull-requests: read` (zero permissões de escrita); no job `deploy_vercel`, restrito a `contents: read`.
+  2. Todas as Actions fixadas por SHA completo de 40 caracteres do commit oficial dereferenciado (`actions/checkout@11d5960a326750d5838078e36cf38b85af677262`, `actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020`, `SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602`, `SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa`, `codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac`).
+  3. Fixada versão exata da Vercel CLI: `npm i -g vercel@65.14.0`.
+  4. Configurado `deploy_vercel` com `needs: ci` e condição `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`, removendo o gatilho `pull_request: closed`.
+- **Evidência de Validação:**
+  - `npx tsc --noEmit`: código `0`
+  - `npm run lint`: código `0` (`0 errors, 0 warnings`)
+  - `npm run test:coverage`: `32 passed` (114 testes), `98.72%` statements
+  - `npm run build`: código `0`
+  - Verificação estrutural do YAML e correspondência exata dos SHAs de 40 caracteres via `git ls-remote`.
+- **Risco Residual (`RISCO ACEITO`):** O pinning por SHA imutável requer atualização manual do hash de 40 caracteres quando novas versões das Actions forem adotadas, conforme critério documentado em `03-security-baseline.md` e `ADR-007`.
 
 ---
 
@@ -99,9 +110,9 @@
 | `A11Y-05` | Acessibilidade | `Header.tsx` utiliza elemento `<nav>` sem links de navegação; `.hintrc` desativa `"axe/aria": "off"`. | **Baixa** | `src/components/Header/Header.tsx`, `.hintrc` | `Identificado` (`PENDENTE`) | `feat/accessibility-seo` |
 | `SEO-01` | SEO | `metadata` em `layout.tsx` mistura título em PT com descrição genérica em EN (`"Personal curriculum website"`), sem metadados Open Graph, Twitter Card ou `metadataBase`. | **Média** | `src/app/layout.tsx` | `Identificado` (`PENDENTE`) | `feat/accessibility-seo` |
 | `SEO-02` | SEO | Ausência de `src/app/robots.ts` e `src/app/sitemap.ts` para indexação por buscadores. | **Baixa** | `src/app/` | `Identificado` (`PENDENTE`) | `feat/accessibility-seo` |
-| `CI-01` | CI/CD | O job `ci` em `.github/workflows/build.yml` executa apenas testes, não validando `npm run lint`, `npx tsc --noEmit` nem `npm run build` antes do deploy. | **Média** | `.github/workflows/build.yml` | `Identificado` (`PENDENTE`) | `security/github-actions` |
-| `CI-02` | Qualidade / Lint | `eslint.config.mjs` não ignora `coverage/**`, gerando 2 warnings nos arquivos de relatório do Vitest quando `npm run lint` roda após `test:coverage`. | **Baixa** | `eslint.config.mjs` | `Identificado` (`PENDENTE`) | `security/github-actions` |
-| `CI-03` | Qualidade / Sonar | `sonar-project.properties` define a chave `sonar.cpd.exclusions` duas vezes (linhas 16 e 19), fazendo a segunda sobrescrever a primeira e anular a exclusão de `src/data/**`. | **Baixa** | `sonar-project.properties` | `Identificado` (`PENDENTE`) | `security/github-actions` |
+| `CI-01` | CI/CD | Inclusão de `npx tsc --noEmit`, `npm run lint` e `npm run build` no job `ci` de `.github/workflows/build.yml` antes do deploy. | **Média** | `.github/workflows/build.yml` | `Validado` em `security/github-actions` (`VERIFICADO` / `PENDENTE` de merge) | `security/github-actions` |
+| `CI-02` | Qualidade / Lint | Inclusão de `"coverage/**"` em `globalIgnores` de `eslint.config.mjs`, eliminando os 2 warnings gerados após `test:coverage`. | **Baixa** | `eslint.config.mjs` | `Validado` em `security/github-actions` (`VERIFICADO` / `PENDENTE` de merge) | `security/github-actions` |
+| `CI-03` | Qualidade / Sonar | Unificação da chave `sonar.cpd.exclusions` em `sonar-project.properties`, preservando a exclusão de `src/data/**` e `src/__tests__/**`. | **Baixa** | `sonar-project.properties` | `Validado` em `security/github-actions` (`VERIFICADO` / `PENDENTE` de merge) | `security/github-actions` |
 | `CLEAN-01` | Limpeza | Dependência `next-themes` não utilizada em `package.json` e arquivos órfãos do Jest (`jest.config.js`, `jest.setup.js`). | **Baixa** | `package.json`, `jest.config.js`, `jest.setup.js` | `Identificado` (`PENDENTE`) | `chore/project-cleanup` |
 | `CLEAN-02` | Limpeza | Componente morto `ContactToast.tsx` (e `ContactToast.test.tsx`) nunca importado por `Contact.tsx` ou qualquer outro módulo. | **Baixa** | `src/components/Contact/ContactToast.tsx`, `ContactToast.test.tsx` | `Identificado` (`PENDENTE`) | `chore/project-cleanup` |
 | `CLEAN-03` | Limpeza | Ativos públicos não utilizados (`public/file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`, `public/images/logos/logoDinamio.png`) e chaves i18n órfãs (`navbar`, `*.description`, `shareButtonStatus.id`). | **Baixa** | `public/`, `src/i18n/{pt,en}.ts` | `Identificado` (`PENDENTE`) | `chore/project-cleanup` |

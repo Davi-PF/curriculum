@@ -16,7 +16,7 @@ master (e56f30f — Produção estável / Intocável durante o ciclo)
         ├── docs/project-playbook            [Documentação permanente e Playbook de Agentes]
         ├── security/dependency-updates      [SEC-01: Atualização de dependências e correção de CVEs]
         ├── security/http-headers            [SEC-02: CSP, X-Frame-Options, nosniff, Referrer, Permissions, poweredByHeader]
-        ├── security/github-actions          [SEC-03 + CI-01..03: Hardening de workflow GitHub Actions e SonarCloud]
+        ├── security/github-actions          [SEC-03 + CI-01..03: Hardening de workflow GitHub Actions, ESLint e SonarCloud]
         ├── fix/functional-bugs              [BUG-01..02: Renderização de múltiplos links e ícone de website]
         ├── perf/image-font-optimization     [PERF-01..04: Otimização de imagens, fontes, reduced-motion e scroll passivo]
         ├── feat/accessibility-seo           [A11Y-01..06 + SEO-01..02: Lang dinâmico, ARIA, dialog, OpenGraph, sitemap/robots]
@@ -30,11 +30,11 @@ master (e56f30f — Produção estável / Intocável durante o ciclo)
 | Branch | Estado no Git | Escopo Exclusivo | Status do Trabalho |
 | :--- | :--- | :--- | :--- |
 | `master` | Existente (`local` + `origin/master` em `e56f30f`) | Versão estável de produção. | **Intacta (`VERIFICADO`)**. Nenhuma alteração direta permitida. |
-| `integration/security-quality` | Existente (`local` + `origin/integration/security-quality`) | Concentrar e validar a integração das branches temáticas antes do merge final em `master`. | **Ativa (`VERIFICADO`)**. Contém `security/dependency-updates` (`5f0cf3f`), `docs/project-playbook` (`2ec4e1b`) e `security/http-headers` (`fbb64d9`). |
+| `integration/security-quality` | Existente (`local` + `origin/integration/security-quality` em `2203a72`) | Concentrar e validar a integração das branches temáticas antes do merge final em `master`. | **Ativa (`VERIFICADO`)**. Contém `security/dependency-updates` (`5f0cf3f`), `docs/project-playbook` (`2ec4e1b`) e `security/http-headers` (`fbb64d9`). |
 | `docs/project-playbook` | Existente (`local` em `2ec4e1b`) | Criação e manutenção de `AGENTS.md` e `docs/project-guidelines/*.md`. | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
 | `security/dependency-updates` | Existente (`local` em `5f0cf3f`) | Atualização segura de dependências (`next@16.4.5`, `vitest@4.1.12`, etc.) para mitigar `[SEC-01]`. | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
 | `security/http-headers` | Existente (`local` em `fbb64d9`) | Implementação dos cabeçalhos HTTP de segurança e `poweredByHeader: false` em `next.config.ts` (`[SEC-02]`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
-| `security/github-actions` | `PLANEJADO` | Hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` no ESLint e correção de `sonar-project.properties`. | Pendente de criação. |
+| `security/github-actions` | Existente (`local`, criada a partir de `2203a72`) | Hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` no ESLint e correção de `sonar-project.properties` (`[SEC-03]` e `CI-01..03`). | **Implementada e Validada localmente (`VERIFICADO`)**, aguardando aprovação de merge em `integration/security-quality`. |
 | `fix/functional-bugs` | `PLANEJADO` | Correção de `ExperienceActivityItem.tsx` (múltiplos links) e `ActivityLink.ts` (ícone `website`). | Pendente de criação. |
 | `perf/image-font-optimization` | `PLANEJADO` | Redimensionamento de imagens pesadas, `sizes` em `HeaderAvatar`, limpeza de fontes, `prefers-reduced-motion` e scroll `{ passive: true }`. | Pendente de criação. |
 | `feat/accessibility-seo` | `PLANEJADO` | Sincronização de `<html lang>`, i18n de `aria-label`, acessibilidade de `SkillModal` e `ExperienceTabs`, Open Graph e `sitemap.ts`/`robots.ts`. | Pendente de criação. |
