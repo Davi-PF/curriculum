@@ -84,13 +84,16 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
 
 ---
 
-## ADR-007: Hardening do GitHub Actions — Deploy Exclusivo via `push` em `master` Condicionado à CI e Pinning por SHA
+## ADR-007: Hardening do GitHub Actions — Deploy Exclusivo via `push` em `master` Condicionado à CI/Quality Gate e Pinning por SHA
 
 - **Data:** 2026-11-09 (`VERIFICADO`)
-- **Contexto:** O workflow original (`.github/workflows/build.yml`) disparava o deploy de produção no fechamento de PR (`pull_request: closed`) sem exigir `needs: ci`, concedia permissões de escrita no `GITHUB_TOKEN`, usava tags mutáveis nas Actions e instalava `vercel` sem versão fixa.
+- **Contexto:** O workflow original (`.github/workflows/build.yml`) disparava o deploy de produção no fechamento de PR (`pull_request: closed`) sem exigir `needs: ci`, executava o `SonarCloud Quality Gate` apenas em eventos `pull_request`, concedia permissões de escrita no `GITHUB_TOKEN`, usava tags mutáveis nas Actions e instalava `vercel` sem versão fixa.
 - **Opções Avaliadas:**
-  1. Manter o deploy atrelado ao evento `pull_request: closed` e apenas fixar versões.
-  2. Acionar o deploy exclusivamente em eventos `push` na branch `master` (`github.event_name == 'push' && github.ref == 'refs/heads/master'`), com `needs: ci`, `permissions: contents: read` por padrão (sem nenhuma permissão de escrita no `GITHUB_TOKEN`), todas as Actions fixadas por SHA de 40 caracteres e Vercel CLI com versão exata (`vercel@65.14.0`).
-- **Decisão Tomada:** **Opção 2 — Deploy exclusivo via `push` na `master` condicionado a `needs: ci`, menor privilégio estrito e Pinning por SHA de 40 caracteres.**
-- **Justificativa:** Garante que nenhum código chegue à produção sem que o commit exato da `master` tenha passado por TypeScript, ESLint, testes com cobertura, build SSG e SonarCloud na própria execução da pipeline, além de eliminar riscos de *Supply Chain* por tags mutáveis ou versões flutuantes da CLI.
+  1. Manter o deploy atrelado ao evento `pull_request: closed` e executar o Quality Gate apenas em PRs.
+  2. Acionar o deploy exclusivamente em eventos `push` na branch `master` (`github.event_name == 'push' && github.ref == 'refs/heads/master'`), condicionado a `needs: ci`, tornando o `SonarCloud Quality Gate` obrigatório tanto em `pull_request` quanto em `push` para `master` (sem executá-lo em pushes para `dev` ou `integration/security-quality`), com menor privilégio estrito no `GITHUB_TOKEN`, Actions fixadas por SHA de 40 caracteres e Vercel CLI com versão exata (`vercel@65.14.0`).
+- **Decisão Tomada:** **Opção 2 — Deploy exclusivo via `push` na `master` condicionado à aprovação integral do job `ci` (incluindo o Quality Gate em `master`), menor privilégio estrito e Pinning por SHA de 40 caracteres.**
+- **Justificativa:**
+  1. O Quality Gate é obrigatório tanto em PRs quanto em pushes para `master` (`github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')`).
+  2. O deploy (`deploy_vercel`) depende da aprovação integral do job `ci` (`needs: ci`), incluindo a aprovação do Quality Gate.
+  3. A execução em `master` avalia o commit efetivamente recebido pela branch antes de liberar o deploy de produção, enquanto evita bloqueios desnecessários em pushes intermediários para `dev` e `integration/security-quality`.
 - **Impacto Técnico:** Qualquer atualização futura de GitHub Actions em `.github/workflows/build.yml` deve consultar o commit SHA dereferenciado (`^{}`) da release oficial via `git ls-remote` e manter o comentário da versão correspondente.

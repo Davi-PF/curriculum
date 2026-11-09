@@ -53,20 +53,21 @@
   1. Instalação não fixada `npm i -g vercel` expunha os jobs de deploy (que detêm `VERCEL_TOKEN`) a versões não testadas ou comprometimento de supply chain.
   2. Uso de tags mutáveis (`@v4`, `@v5`, `@v6`, `@v1`) nas GitHub Actions.
   3. Permissões excessivas de escrita (`pull-requests: write`, `checks: write`, `statuses: write`) no `GITHUB_TOKEN` sem padrão global restritivo.
-  4. Acionamento de deploy em `pull_request: closed` sem dependência formal (`needs: ci`) sobre o commit da `master`.
+  4. Acionamento de deploy em `pull_request: closed` sem dependência formal (`needs: ci`) e sem validação do Quality Gate sobre o commit efetivo da `master`.
 - **Status Atual:** **`Validado` na branch local `security/github-actions` [`VERIFICADO`] / `PENDENTE` de merge em `integration/security-quality`**.
 - **Branch Responsável:** `security/github-actions`
 - **Medida Corretiva Adotada:**
   1. Definido `permissions: contents: read` como padrão global do workflow; no job `ci`, restrito apenas a `contents: read` e `pull-requests: read` (zero permissões de escrita); no job `deploy_vercel`, restrito a `contents: read`.
   2. Todas as Actions fixadas por SHA completo de 40 caracteres do commit oficial dereferenciado (`actions/checkout@11d5960a326750d5838078e36cf38b85af677262`, `actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020`, `SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602`, `SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa`, `codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac`).
   3. Fixada versão exata da Vercel CLI: `npm i -g vercel@65.14.0`.
-  4. Configurado `deploy_vercel` com `needs: ci` e condição `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`, removendo o gatilho `pull_request: closed`.
+  4. Configurada a etapa `SonarCloud Quality Gate` para executar obrigatoriamente em `pull_request` e em `push` para `master` (`github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')`), omitindo-a em pushes para `dev` e `integration/security-quality`.
+  5. Configurado `deploy_vercel` com `needs: ci` e condição `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`, garantindo que o deploy dependa da aprovação integral do job `ci` (incluindo o Quality Gate sobre o commit efetivamente recebido pela `master`).
 - **Evidência de Validação:**
   - `npx tsc --noEmit`: código `0`
   - `npm run lint`: código `0` (`0 errors, 0 warnings`)
   - `npm run test:coverage`: `32 passed` (114 testes), `98.72%` statements
   - `npm run build`: código `0`
-  - Verificação estrutural do YAML e correspondência exata dos SHAs de 40 caracteres via `git ls-remote`.
+  - Verificação estrutural do YAML, condições `if` e correspondência exata dos SHAs de 40 caracteres via `git ls-remote`.
 - **Risco Residual (`RISCO ACEITO`):** O pinning por SHA imutável requer atualização manual do hash de 40 caracteres quando novas versões das Actions forem adotadas, conforme critério documentado em `03-security-baseline.md` e `ADR-007`.
 
 ---

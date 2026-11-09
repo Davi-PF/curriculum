@@ -74,7 +74,7 @@ A tabela abaixo apresenta os controles implementados na branch `security/http-he
 ## 4. Segurança de CI/CD e Vercel
 
 ### Estado Atual (`VERIFICADO` / `Validado` em `security/github-actions`, `PENDENTE` de merge em `integration/security-quality`)
-- O arquivo `.github/workflows/build.yml` executa validação completa e scan do SonarCloud (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`).
+- O arquivo `.github/workflows/build.yml` executa validação completa, scan do SonarCloud e verificação do Quality Gate (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`).
 - **Segredos (`VERIFICADO`):** Não há tokens ou credenciais hardcoded no repositório ou no histórico Git. Os segredos `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_ORGANIZATION_KEY`, `CODECOV_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` são injetados via GitHub Actions Secrets.
 
 ### Controles Obrigatórios Implementados em `security/github-actions`
@@ -91,11 +91,12 @@ A tabela abaixo apresenta os controles implementados na branch `security/http-he
    - Padrão global no topo do workflow: `permissions: contents: read`.
    - Job `ci`: `contents: read` e `pull-requests: read` (nenhuma permissão `write` no `GITHUB_TOKEN`).
    - Job `deploy_vercel`: estritamente `contents: read`.
-3. **Estratégia Segura de Deploy Condicionada à CI:**
+3. **Estratégia Segura de Deploy Condicionada à CI e ao Quality Gate:**
    - O deploy de produção (`deploy_vercel`) exige `needs: ci` e executa **exclusivamente** quando `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`.
-   - Foi removido o gatilho `pull_request: closed` para deploy, impedindo qualquer publicação em produção sem aprovação prévia do job `ci` sobre o commit da `master`.
+   - A etapa `SonarCloud Quality Gate` dentro do job `ci` é executada obrigatoriamente tanto em `pull_request` quanto em `push` para `master` (`github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')`), não sendo executada em pushes para `dev` ou `integration/security-quality`.
+   - Dessa forma, a execução em `master` avalia o commit efetivamente recebido pela branch e bloqueia o `deploy_vercel` caso o Quality Gate reprove o commit.
 4. **Quality Gate Completo no Job `ci`:**
-   - O job `ci` executa sequencialmente `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage` e `npm run build` antes do scan do SonarCloud e upload do Codecov.
+   - O job `ci` executa sequencialmente `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage`, `npm run build`, `SonarQube Scan`, `SonarCloud Quality Gate` (em PRs e em pushes para `master`) e `Upload coverage`.
    - Em `eslint.config.mjs`, `"coverage/**"` está incluído em `globalIgnores`, garantindo `0 warnings` mesmo quando o lint roda após `test:coverage`.
    - Em `sonar-project.properties`, `sonar.cpd.exclusions` está unificada em uma única declaração contemplando `src/i18n/**`, `src/data/**` e `src/__tests__/**`.
 
