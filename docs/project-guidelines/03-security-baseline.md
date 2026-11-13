@@ -9,10 +9,21 @@
 
 ## 1. Segurança de Código (SAST e Prevenção de XSS)
 
+### Análise Estática Preventiva no ESLint 9 (`SEC-06-A`)
+- **Configuração (`VERIFICADO`):** `eslint.config.mjs` define o bloco nomeado `security/preventive-rules` aplicado a `**/*.{js,jsx,mjs,ts,tsx,mts,cts}` com severidade `"error"` (sem adicionar novas dependências ao `package.json`), além dos presets `nextVitals` e `nextTs`:
+  - `no-eval`: `"error"`
+  - `no-implied-eval`: `"error"`
+  - `no-new-func`: `"error"`
+  - `no-script-url`: `"error"`
+  - `react/no-danger`: `"error"`
+  - `react/jsx-no-script-url`: `"error"`
+  - `react/jsx-no-target-blank`: `"error"`
+- **Limitação Conhecida (`RISCO ACEITO` / `ADR-009`):** As regras preventivas do ESLint atuam em nível sintático/AST intra-arquivo e **não realizam análise interprocedural de fluxo de dados (*taint analysis*)**; por isso atuam de forma complementar ao TypeScript (`tsc --noEmit`), às regras de segurança do SonarCloud e aos testes automatizados (ver [`decisions/ADR-009-sast-and-code-quality-strategy.md`](decisions/ADR-009-sast-and-code-quality-strategy.md)).
+
 ### Requisitos Obrigatórios
 1. **Proibição de Injeção de HTML/Script:**
    - É **estritamente proibido** utilizar `dangerouslySetInnerHTML`, `eval()`, `new Function()`, `document.write()` ou `innerHTML` em qualquer componente ou hook.
-   - `Status: VERIFICADO` — A auditoria SAST confirmou zero ocorrências dessas APIs em todo o diretório `src/`.
+   - `Status: VERIFICADO` — A auditoria SAST confirmou zero ocorrências dessas APIs em todo o diretório `src/`, agora protegidas preventivamente pelo bloco `security/preventive-rules` em `eslint.config.mjs` (`SEC-06-A`).
 2. **Manipulação Segura do DOM e Minimização de URLs Compartilhadas:**
    - Toda renderização de textos (incluindo dados vindos de `src/i18n/` e `src/data/`) deve ocorrer via JSX padrão do React, garantindo escapamento automático contra XSS.
    - O uso de APIs imperativas do navegador deve restringir-se a operações seguras de estado visual/interação:
@@ -27,6 +38,7 @@
 - **Regra Obrigatória:** Todo elemento `<a target="_blank">` que aponte para domínios externos (GitHub, LinkedIn, Google Drive, YouTube, Google Colab, etc.) **deve obrigatoriamente** conter:
   - Protocolo explícito `https://`.
   - Atributo `rel="noopener noreferrer"` para prevenir *Reverse Tabnabbing* e vazamento de referência de janela (`window.opener`).
+  - A regra `react/jsx-no-target-blank: "error"` em `eslint.config.mjs` bloqueia regressões em links JSX estáticos (`SEC-06-A`).
 - **Estado Atual (`VERIFICADO`):**
   - `src/components/Contact/ContactItem.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
   - `src/components/Contact/CurriculumDriveAccess.tsx`: Utiliza `target="_blank"` e `rel="noopener noreferrer"`.
@@ -112,10 +124,16 @@ Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as f
    - O deploy de produção (`deploy_vercel`) exige `needs: ci` e executa **exclusivamente** quando `success() && github.event_name == 'push' && github.ref == 'refs/heads/master'`.
    - A etapa `SonarCloud Quality Gate` dentro do job `ci` é executada obrigatoriamente tanto em `pull_request` quanto em `push` para `master` (`github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')`), não sendo executada em pushes para `dev` ou `integration/security-quality`.
    - Dessa forma, a execução em `master` avalia o commit efetivamente recebido pela branch e bloqueia o `deploy_vercel` caso o Quality Gate reprove o commit.
-4. **Quality Gate Completo no Job `ci`:**
+4. **Quality Gate Completo e SAST em Profundidade no Job `ci`:**
    - O job `ci` executa sequencialmente `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage`, `npm run build`, `SonarQube Scan`, `SonarCloud Quality Gate` (em PRs e em pushes para `master`) e `Upload coverage`.
-   - Em `eslint.config.mjs`, `"coverage/**"` está incluído em `globalIgnores`, garantindo `0 warnings` mesmo quando o lint roda após `test:coverage`.
-   - Em `sonar-project.properties`, `sonar.cpd.exclusions` está unificada em uma única declaração contemplando `src/i18n/**`, `src/data/**` e `src/__tests__/**`.
+   - Em `eslint.config.mjs`, `"coverage/**"` está incluído em `globalIgnores`, garantindo `0 warnings` mesmo quando o lint roda após `test:coverage`, e o bloco `security/preventive-rules` aplica regras preventivas de segurança antes da etapa de análise remota (`SEC-06-A`).
+   - Em `sonar-project.properties` (`SEC-06-B`):
+     - `sonar.sources=src,next.config.ts` expande o escopo SAST remoto para incluir os cabeçalhos de segurança e a política CSP configurados em `next.config.ts`;
+     - `sonar.javascript.lcov.reportPaths=coverage/lcov.info` está centralizado exclusivamente em `sonar-project.properties` (removida a propriedade duplicada de `.github/workflows/build.yml`);
+     - `sonar.coverage.exclusions` inclui `src/app/**` (alinhado a `vitest.config.ts`), além de `src/i18n/**`, `src/locales/**`, `public/locales/**`, `**/i18n/**`, `**/locales/**`, `src/**/data/**` e `src/**/constants/**`;
+     - `sonar.cpd.exclusions` permanece unificada em uma única declaração contemplando `src/i18n/**`, `src/data/**` e `src/__tests__/**`.
+   - **Defesa em Profundidade (`ADR-009`):** `tsc --noEmit` (segurança de tipos), ESLint (`security/preventive-rules`), Vitest (`test:coverage`) e SonarCloud (`SonarQube Scan` / `Quality Gate`) atuam de forma complementar entre prevenção sintática local e análise estática abrangente na CI.
+   - **Pendência de Confirmação Remota (`PENDENTE`):** A configuração foi validada localmente na branch `security/sast-code-quality`; a confirmação da indexação efetiva de `next.config.ts` e da importação de `coverage/lcov.info` no servidor do SonarCloud depende da próxima execução autorizada da pipeline CI.
 
 ---
 

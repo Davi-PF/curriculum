@@ -129,15 +129,34 @@
 
 ---
 
-### `[SEC-06]` SAST, Detecção de Segredos e Segurança de Links Externos
-- **Severidade:** Nenhuma (Auditoria aprovada sem vulnerabilidades)
-- **Arquivos Auditados:** Todo o diretório `src/**`, histórico Git (`git log -p`) e componentes com links externos (`ContactItem.tsx`, `CurriculumDriveAccess.tsx`, `ExperienceActivityItem.tsx`).
-- **Impacto Potencial:** N/A.
-- **Status Atual:** **`Validado` / Conforme [`VERIFICADO`]**.
-- **Evidência de Validação:**
-  - Zero ocorrências de `dangerouslySetInnerHTML`, `eval`, `innerHTML` ou Open Redirect.
-  - Zero segredos ou chaves privadas expostas no código ou histórico Git.
-  - Todos os links `target="_blank"` utilizam `https://` e `rel="noopener noreferrer"`.
+### `[SEC-06]` SAST, Análise Estática e Qualidade de Código (`SEC-06-A`, `SEC-06-B`, `SEC-06-C`)
+- **Severidade Geral:** Baixa / Informativa (auditoria sem vulnerabilidades ativas de código; endurecimento preventivo e alinhamento de escopo SAST implementados)
+- **Arquivos Auditados / Alterados na Etapa:** Todo o diretório `src/**`, `next.config.ts`, histórico Git, [`eslint.config.mjs`](../../eslint.config.mjs), [`sonar-project.properties`](../../sonar-project.properties), [`vitest.config.ts`](../../vitest.config.ts) e [`.github/workflows/build.yml`](../../.github/workflows/build.yml).
+- **Decisão Arquitetural Associada:** [`decisions/ADR-009-sast-and-code-quality-strategy.md`](decisions/ADR-009-sast-and-code-quality-strategy.md).
+- **Base Auditada Sem Vulnerabilidades Ativas (`VERIFICADO`):**
+  - Zero ocorrências de `dangerouslySetInnerHTML`, `eval()`, `new Function()`, `document.write()`, `innerHTML` ou Open Redirect em `src/`.
+  - Zero segredos ou chaves privadas expostas no código-fonte ou no histórico Git auditado.
+  - Todos os links `target="_blank"` utilizam `https://` e `rel="noopener noreferrer"` (`ContactItem.tsx`, `CurriculumDriveAccess.tsx`, `ExperienceActivityItem.tsx`).
+- **Registro Detalhado dos Achados de SAST & Qualidade (`SEC-06`):**
+  - **`SEC-06-01` (`Low`) — Exclusão de `next.config.ts` no escopo de análise do SonarCloud:**
+    - *Status:* **`Corrigido localmente` na branch `security/sast-code-quality` (`SEC-06-B`, commit `17465ff`) / Confirmação remota pendente**.
+    - *Ação:* `sonar.sources` em `sonar-project.properties` foi expandido de `src` para `src,next.config.ts`, passando a incluir os headers HTTP de segurança e a política CSP no escopo de análise estática do SonarCloud. A indexação efetiva de `next.config.ts` pelo servidor do SonarCloud aguarda a próxima execução autorizada de CI.
+  - **`SEC-06-02` (`Low`) — Ausência de regras preventivas explícitas de segurança no ESLint:**
+    - *Status:* **`Corrigido` na branch `security/sast-code-quality` (`SEC-06-A`, commit `0c46ed0`)**.
+    - *Ação:* Adicionado o bloco `security/preventive-rules` em `eslint.config.mjs` com severidade `"error"` para `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url`, `react/no-danger`, `react/jsx-no-script-url` e `react/jsx-no-target-blank`, sem novas dependências.
+    - *Risco Residual (`RISCO ACEITO` / `ADR-009`):* Regras ESLint operam apenas no nível sintático/AST por arquivo e não substituem análise interprocedural de fluxo de dados (*taint analysis*).
+  - **`SEC-06-03` (`Informational`) — Desalinhamento de exclusões de cobertura (`src/app/**`) e duplicação da propriedade `lcov.reportPaths`:**
+    - *Status:* **`Corrigido localmente` na branch `security/sast-code-quality` (`SEC-06-B`, commit `17465ff`) / Confirmação remota pendente**.
+    - *Ação:* `src/app/**` foi adicionado a `sonar.coverage.exclusions` em `sonar-project.properties` (espelhando `vitest.config.ts`), e a flag redundante `-Dsonar.javascript.lcov.reportPaths=coverage/lcov.info` foi removida de `.github/workflows/build.yml` para manter fonte única de configuração em `sonar-project.properties`. A confirmação da importação de `coverage/lcov.info` no servidor do SonarCloud aguarda a próxima execução autorizada de CI.
+  - **`SEC-06-04` (`Informational`) — Visibilidade incompleta de Quality Gate, perfis e proteção contra segredos no provedor remoto:**
+    - *Status:* **`Parcialmente mitigado / Dependente de validação externa` (`RISCO ACEITO` operacional no escopo do repositório)**.
+    - *Detalhe:* As configurações remotas da conta GitHub (Secret Scanning, Push Protection, branch protection) e do projeto no SonarCloud (limiares do Quality Gate e Quality Profiles ativos) ficam fora do controle de versão local e não foram auditadas nesta etapa.
+  - **`SEC-06-05` (`Informational`) — Adoção do GitHub CodeQL no fluxo atual:**
+    - *Status:* **`Aceito / Mantido sem CodeQL nesta etapa` (conforme [`ADR-007`](09-technical-decisions.md#adr-007-ado%C3%A7%C3%A3o-de-arquitetura-est%C3%A1tica-ssg-com-headers-e-csp-centralizados-no-nextconfigts-e-an%C3%A1lise-est%C3%A1tica-combinada-sem-codeql-imediato) e [`ADR-009`](decisions/ADR-009-sast-and-code-quality-strategy.md))**.
+    - *Justificativa:* Portfolio SSG sem backend, autenticação ou processamento de dados confidenciais de usuários; a combinação ESLint 9 (`security/preventive-rules`) + TypeScript + SonarCloud + Vitest atende ao perfil de risco atual, com gatilhos objetivos de reavaliação documentados na `ADR-009`.
+  - **`SEC-06-06` (`Informational`) — Higiene de qualidade e manutenibilidade (`CLEAN-04` / arquivos residuais ou helpers sem cobertura):**
+    - *Status:* **`Fora do escopo da SEC-06` (mantido sob acompanhamento em `CLEAN-04`)**.
+    - *Detalhe:* Nenhuma refatoração funcional de componentes ou exclusão de arquivos fora do escopo SAST foi executada na `SEC-06`, preservando estabilidade e rastreabilidade dos achados de qualidade da Seção 2.
 
 ---
 
