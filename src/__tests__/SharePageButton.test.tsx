@@ -35,8 +35,9 @@ type ShareFn = (data: ShareData) => Promise<void>;
 type ClipboardWriteTextFn = (text: string) => Promise<void>;
 
 function setLocationHref(href: string) {
+  const parsed = new URL(href);
   Object.defineProperty(globalThis, "location", {
-    value: { href },
+    value: { href, origin: parsed.origin, pathname: parsed.pathname },
     writable: true,
     configurable: true,
   });
@@ -147,7 +148,7 @@ describe("SharePageButton", () => {
       await waitFor(() => expect(button).toHaveTextContent("Erro"));
     });
 
-    it("quando url não é passada, usa location.href", async () => {
+    it("quando url não é passada, usa origin + pathname da página atual", async () => {
       const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
       patchNavigator({ share: shareMock });
 
@@ -159,9 +160,40 @@ describe("SharePageButton", () => {
         );
       });
     });
+
+    it("descarta query string e fragmento da URL atual ao compartilhar (SEC-05)", async () => {
+      setLocationHref(
+        "https://example.com/current?utm_source=newsletter&fbclid=abc123#contato"
+      );
+      const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
+      patchNavigator({ share: shareMock });
+
+      renderAndClick(); // sem url
+
+      await waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+      const sharedUrl = shareMock.mock.calls[0][0].url;
+      expect(sharedUrl).toBe("https://example.com/current");
+      expect(sharedUrl).not.toContain("?");
+      expect(sharedUrl).not.toContain("#");
+    });
   });
 
   describe("Clipboard API (fallback)", () => {
+    it("copia apenas origin + pathname quando url não é passada (SEC-05)", async () => {
+      setLocationHref("https://example.com/current?gclid=xyz#secao");
+      const writeTextMock = vi.fn<ClipboardWriteTextFn>().mockResolvedValue(undefined);
+
+      patchNavigator({
+        clipboard: { writeText: writeTextMock } as unknown as Clipboard,
+      });
+
+      renderAndClick(); // sem url
+
+      await waitFor(() =>
+        expect(writeTextMock).toHaveBeenCalledWith("https://example.com/current")
+      );
+    });
+
     it("copia para clipboard quando Web Share não está disponível", async () => {
       const writeTextMock = vi.fn<ClipboardWriteTextFn>().mockResolvedValue(undefined);
 

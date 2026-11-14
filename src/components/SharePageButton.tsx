@@ -12,6 +12,18 @@ type Props = {
 
 type Status = "idle" | "copied" | "shared" | "error";
 
+/**
+ * Builds the shareable page URL from `origin + pathname` only, intentionally
+ * discarding the query string and the fragment so that tracking parameters
+ * (e.g. `utm_*`, `fbclid`, `gclid`) or any other value present in the visitor's
+ * current URL are not propagated to third parties (SEC-05).
+ */
+function getCanonicalPageUrl(): string {
+  if (globalThis.window === undefined) return "";
+  const { origin, pathname } = globalThis.location;
+  return `${origin}${pathname}`;
+}
+
 export default function SharePageButton({
   url,
   title = "Currículo / Portfólio",
@@ -23,13 +35,12 @@ export default function SharePageButton({
 
   const shareUrl = useMemo(() => {
     if (url) return url;
-    if (globalThis.window !== undefined) return globalThis.location.href;
-    return "";
+    return getCanonicalPageUrl();
   }, [url]);
 
   async function handleShare() {
     try {
-      const finalUrl = shareUrl || globalThis.location.href;
+      const finalUrl = shareUrl || getCanonicalPageUrl();
 
       // 1) Web Share API
       if (typeof navigator !== "undefined" && "share" in navigator) {
