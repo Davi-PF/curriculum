@@ -28,12 +28,17 @@
   - Importa matchers do `@testing-library/jest-dom`.
   - Define mocks globais para `next/image` (renderizando `<img>` padrão para inspeção de atributos nos testes) e para `IntersectionObserver`.
 - **Organização:**
-  - Existem **32 arquivos de teste** (`*.test.tsx` / `*.test.ts`)em `src/__tests__/`, totalizando **114 testes unitários e de integração**.
-- **Métricas Atuais de Cobertura (`VERIFICADO`):**
-  - **Statements:** `98.72%`
-  - **Branches:** `95.58%`
+  - Existem **33 arquivos de teste** (`*.test.tsx` / `*.test.ts`) em `src/__tests__/`, totalizando **120 testes unitários e de integração**.
+- **Métricas Atuais de Cobertura Observadas Localmente (`VERIFICADO` em `security/sast-code-quality`):**
+  - **Statements:** `98.76%`
+  - **Branches:** `95.77%`
   - **Functions:** `100%`
-  - **Lines:** `99.53%`
+  - **Lines:** `100%`
+  - **`next.config.ts` (incluído no escopo do SonarCloud na `SEC-06-B`):** `100%` (Statements, Branches, Functions e Lines).
+  - *Nota:* As métricas acima representam os valores observados na execução local com Vitest/V8; elas servem como referência técnica de regressão e não devem ser assumidas como limiares configurados no servidor do SonarCloud Quality Gate (configuração externa não auditada localmente).
+- **Alinhamento de Exclusões de Cobertura (`vitest.config.ts` ↔ `sonar-project.properties`):**
+  - `vitest.config.ts` exclui `**/src/app/**`, `**/src/i18n/**`, `**/src/locales/**`, `**/src/**/data/**` e `**/src/**/constants/**` (além de artefatos de build/teste).
+  - Na `SEC-06-B`, `sonar-project.properties` passou a incluir `src/app/**` em `sonar.coverage.exclusions`, alinhando o cálculo de cobertura exibido pelo SonarCloud ao escopo efetivamente medido pelo Vitest em `coverage/lcov.info`.
 - **Regra de Manutenção de Cobertura:**
   - Nenhuma alteração de código deve reduzir a cobertura global ou deixar novos ramos condicionais (`if/else`, `try/catch`, fallbacks) sem testes unitários correspondentes.
 
@@ -41,7 +46,7 @@
 
 ## 3. Checklist de Validação Obrigatória (Antes de Qualquer Commit / PR)
 
-Para toda branch que altere código-fonte (`src/`), configurações (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `.github/workflows/build.yml`) ou dependências (`package.json`), os **4 comandos abaixo devem ser executados nesta ordem** e todos devem retornar código de saída `0`:
+Para toda branch que altere código-fonte (`src/`), configurações (`next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `sonar-project.properties`, `.github/workflows/build.yml`) ou dependências (`package.json`), os **4 comandos abaixo devem ser executados nesta ordem** e todos devem retornar código de saída `0`:
 
 ### 1. Verificação de Tipos TypeScript
 ```bash
@@ -49,24 +54,31 @@ npx tsc --noEmit
 ```
 - **Critério de aprovação:** Zero erros de compilação ou tipagem.
 
-### 2. Linting (ESLint)
+### 2. Linting e Regras Preventivas de Segurança (ESLint 9)
 ```bash
 npm run lint
 ```
 - **Critério de aprovação:** Zero erros e zero warnings (`0 errors, 0 warnings`).
-- **Nota Técnica (`VERIFICADO` em `security/github-actions`):** O diretório `"coverage/**"` foi adicionado a `globalIgnores` em `eslint.config.mjs` (`[CI-02]`), eliminando os 2 warnings que antes ocorriam nos arquivos gerados pelo Vitest em `coverage/`.
+- **Cobertura de Segurança (`SEC-06-A`):** Além dos presets `nextVitals` e `nextTs`, o bloco `security/preventive-rules` em `eslint.config.mjs` exige `"error"` para `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url`, `react/no-danger`, `react/jsx-no-script-url` e `react/jsx-no-target-blank`.
+- **Nota Técnica (`VERIFICADO`):** O diretório `"coverage/**"` está incluído em `globalIgnores` em `eslint.config.mjs` (`[CI-02]`), evitando warnings sobre os arquivos gerados pelo Vitest em `coverage/` quando `npm run lint` é executado após `npm run test:coverage`.
 
-### 3. Testes Automatizados e Cobertura
+### 3. Testes Automatizados e Cobertura (Geração de LCOV)
 ```bash
 npm run test:coverage
 ```
-- **Critério de aprovação:** 100% das suítes e testes passando (`32 passed`, `114 passed`), sem regressão nas métricas de cobertura.
+- **Critério de aprovação:** 100% das suítes e testes passando (`33 passed`, `120 passed`), geração bem-sucedida de `coverage/lcov.info` e ausência de regressão nas métricas de cobertura.
+- **Nota Operacional em Windows:** Em ambientes Windows locais com contenção de CPU ou processos paralelos de workers, o comando equivalente com paralelismo limitado `npm run test:coverage -- --maxWorkers=2` evita *timeouts* de inicialização sem alterar `vitest.config.ts` nem os resultados de cobertura.
 
 ### 4. Build de Produção
 ```bash
 npm run build
 ```
-- **Critério de aprovação:** Compilação concluída com sucesso e geração estática das rotas `/` e `/_not-found` sem erros.
+- **Critério de aprovação:** Compilação concluída com sucesso e geração estática (`○ Static`) das rotas `/` e `/_not-found` sem erros.
+- **Observação de Rede (`next/font/google`):** O build consulta `fonts.googleapis.com` durante o empacotamento das fontes `Geist` e `Geist Mono`, exigindo acesso de saída HTTPS na execução.
+
+### 5. Pipeline SAST Remota (GitHub Actions + SonarCloud)
+- No workflow [`.github/workflows/build.yml`](../../.github/workflows/build.yml), após a sequência local equivalente (`npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage`, `npm run build`), o job `ci` executa `SonarQube Scan` e `SonarCloud Quality Gate` (em `pull_request` e em `push` para `master`), consumindo centralizadamente [`sonar-project.properties`](../../sonar-project.properties) (`sonar.sources=src,next.config.ts` e `sonar.javascript.lcov.reportPaths=coverage/lcov.info`).
+- **Pendência de Confirmação Remota (`SEC-06-B`):** As alterações em `sonar-project.properties` e `.github/workflows/build.yml` foram validadas localmente; a confirmação da indexação efetiva de `next.config.ts` e da importação de `coverage/lcov.info` no servidor do SonarCloud depende da próxima execução autorizada da pipeline no GitHub Actions.
 
 ---
 
