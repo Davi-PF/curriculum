@@ -1,9 +1,52 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { Activity } from "../../types/ExperienceRelated/Activity";
-import { ActivityVariant, getLinkIcon } from "../../types/ExperienceRelated/ActivityLink";
+import {
+  ActivityLink,
+  ActivityVariant,
+  getLinkIcon,
+} from "../../types/ExperienceRelated/ActivityLink";
 
 interface ExperienceActivityItemProps {
   readonly activity: Activity;
+}
+
+interface ActivityLinkAnchorProps {
+  readonly link: ActivityLink;
+  readonly className: string;
+  readonly iconClassName?: string;
+  readonly children: ReactNode;
+}
+
+function ActivityLinkAnchor({
+  link,
+  className,
+  iconClassName = "",
+  children,
+}: ActivityLinkAnchorProps) {
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+    >
+      {children}
+
+      <Image
+        src={getLinkIcon(link.type)}
+        alt={link.type}
+        width={16}
+        height={16}
+        className={`
+          opacity-70
+          transition-opacity
+          group-hover:opacity-100
+          ${iconClassName}
+        `}
+      />
+    </a>
+  );
 }
 
 const styles = {
@@ -24,9 +67,15 @@ const styles = {
 export function ExperienceActivityItem({
   activity,
 }: ExperienceActivityItemProps) {
-  const primaryLink = activity.links?.[0];
+  const validLinks = (activity.links ?? []).flatMap((link) => {
+    const normalizedUrl = link.url?.trim() ?? "";
+    if (!normalizedUrl) return [];
+    return [{ ...link, url: normalizedUrl }];
+  });
+  const singleLink = validLinks.length === 1 ? validLinks[0] : undefined;
 
-  const variant: ActivityVariant = primaryLink?.variant ?? "experience";
+  const variant: ActivityVariant =
+    validLinks[0]?.variant ?? activity.variant ?? "experience";
 
   const style = styles[variant];
 
@@ -40,11 +89,10 @@ export function ExperienceActivityItem({
       "
     >
       <div className="flex flex-col gap-0.5">
-        {primaryLink ? (
-          <a
-            href={primaryLink.url}
-            target="_blank"
-            rel="noopener noreferrer"
+        {singleLink ? (
+          <ActivityLinkAnchor
+            link={singleLink}
+            iconClassName="ml-2"
             className="
               flex items-center gap-1
               text-emerald-300 font-medium
@@ -55,24 +103,34 @@ export function ExperienceActivityItem({
             <span className={style.title}>
               {activity.title}
             </span>
-
-            <Image
-              src={getLinkIcon(primaryLink.type)}
-              alt={primaryLink.type}
-              width={16}
-              height={16}
-              className="
-                ml-2
-                opacity-70
-                transition-opacity
-                group-hover:opacity-100
-              "
-            />
-          </a>
+          </ActivityLinkAnchor>
         ) : (
-          <span className={`text-emerald-300 ${style.title}`}>
-            {activity.title}
-          </span>
+          <>
+            <span className={`text-emerald-300 font-medium ${style.title}`}>
+              {activity.title}
+            </span>
+
+            {validLinks.length > 1 && (
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                {validLinks.map((link, index) => (
+                  <ActivityLinkAnchor
+                    key={`${link.type}-${link.label}-${link.url}-${index}`}
+                    link={link}
+                    className="
+                      inline-flex items-center gap-1.5
+                      rounded-md px-2 py-0.5
+                      text-xs font-medium text-emerald-300
+                      bg-stone-800/50 border border-emerald-500/20
+                      hover:bg-stone-700/60 hover:underline
+                      transition-colors group
+                    "
+                  >
+                    <span>{link.label || link.type}</span>
+                  </ActivityLinkAnchor>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {style.showDescription && activity.description && (
