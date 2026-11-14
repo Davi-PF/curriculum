@@ -116,3 +116,28 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
   3. **Inadequação de `Report-Only` isolado:** Sem um endpoint externo coletor de relatórios (`report-uri`/`report-to`), substituir `Content-Security-Policy` por `Content-Security-Policy-Report-Only` apenas desativaria a proteção ativa no navegador, enfraquecendo a política anterior.
   4. **Redução efetiva da superfície de ataque:** A remoção de `blob:` em `img-src`, a remoção de `data:` em `font-src` e a adição de `frame-src 'none'` eliminam permissões desnecessárias sem afetar nenhum recurso legítimo do portfólio.
 - **Impacto Técnico:** As funções `buildCspHeader(isDev)` e `getSecurityHeaders(isDev)` em `next.config.ts` são verificadas automaticamente pela suíte `src/__tests__/nextConfigHeaders.test.ts` em toda execução do Vitest e na pipeline de CI.
+
+---
+
+> *Nota de numeração:* O `ADR-009` encontra-se registrado em [`decisions/ADR-009-sast-and-code-quality-strategy.md`](decisions/ADR-009-sast-and-code-quality-strategy.md).
+
+## ADR-010: Migração Controlada de Runtime para Node.js 26 LTS (`26.13.0`) e Atualização das GitHub Actions para `node24`
+
+- **Data:** 2026-11-14 (`VERIFICADO`)
+- **Contexto:** O ambiente local passou a operar com Node.js `v26.13.0` (LTS *Lithium*) e npm `11.20.0`, enquanto o repositório ainda especificava `node-version: 20` em `.github/workflows/build.yml` sem declaração explícita em `.nvmrc` ou `package.json`. Além disso, a auditoria do workflow identificou que as GitHub Actions então fixadas (`actions/checkout@v4.4.0`, `actions/setup-node@v4.4.0`, `SonarSource/sonarqube-scan-action@v6.0.0` e `actions/github-script@v7.0.1` invocada internamente por `codecov/codecov-action@v5.5.5`) executavam sob o runtime interno `node20`, descontinuado nos runners do GitHub.
+- **Opções Avaliadas:**
+  1. **Atualizar apenas `node-version` em `actions/setup-node` mantendo `v4.4.0` e demais Actions em `node20`:** Falharia na execução remota após a remoção do runtime `node20` dos runners do GitHub e deixaria ambientes locais e Vercel sem contrato explícito de versão.
+  2. **Fixar `engines.node` exatamente em `"26.13.0"` e criar `.nvmrc` + `.node-version` + atualizar dependências npm indiscriminadamente:** Introduziria arquivos redundantes, restringiria patches menores compatíveis em plataformas gerenciadas (Vercel) e alteraria pacotes sem necessidade comprovada.
+  3. **Migração mínima e compatibilizada em duas camadas distintas:**
+     - **Runtime do projeto:** Adicionar `.nvmrc` (`26.13.0`), declarar `"engines": { "node": "26.x" }` em `package.json` e configurar `node-version: '26.13.0'` em `actions/setup-node` nos jobs `ci` e `deploy_vercel`, sem atualizar dependências npm sem incompatibilidade real.
+     - **Runtime das GitHub Actions:** Atualizar por SHA completo de 40 caracteres para versões oficiais compatíveis com `node24` (`actions/checkout@v7.0.1`, `actions/setup-node@v7.1.0`, `SonarSource/sonarqube-scan-action@v8.5.0` e `codecov/codecov-action@v7.1.1`), mantendo `SonarSource/sonarqube-quality-gate-action@v1.2.1` (`composite`).
+- **Decisão Tomada:** **Opção 3 — Padronização de runtime Node.js `26.13.0` / `26.x` para o projeto aliada à atualização por SHA das GitHub Actions para `node24`.**
+- **Justificativa:**
+  1. Separa explicitamente o runtime do projeto (`26.13.0`) do runtime interno das Actions (`node24`/`composite`).
+  2. `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage -- --maxWorkers=2` (`33` arquivos, `120` testes, `98.76%` Statements / `95.77%` Branches / `100%` Functions / `100%` Lines) e `npm run build` (`○ Static`) comprovaram compatibilidade integral das dependências existentes com Node.js `v26.13.0`.
+  3. Evita redundância entre `.nvmrc` e `.node-version` e permite à Vercel selecionar automaticamente a família `26.x` (sujeita à conferência manual no painel).
+- **Consequências, Riscos e Estratégia de Compatibilidade:**
+  - **`@types/node` (`^20` / `20.19.29`):** Mantido inalterado porque o código-fonte não utiliza APIs exclusivas do Node 22–26; deve ser reavaliado futuramente caso novos módulos utilizem APIs padrão introduzidas após o Node 20.
+  - **Avisos `[DEP0205]` (`module.register()`):** Emissões não bloqueantes vindas de dependências (`vitest`/`next`) sob Node 26 permanecem toleradas até atualização upstream.
+  - **Verificação OpenPGP no `sonarqube-scan-action@v8.5.0`:** A v8 passa a exigir `gpg` e `dirmngr` com verificação habilitada por padrão (`skipSignatureVerification: false`), ambos presentes em `ubuntu-latest`.
+  - **Pendências externas:** Conferir/selecionar Node.js `26.x` em **Settings → Build and Deployment → Node.js Version** na Vercel e validar o job remoto completo (`ci`, `SonarQube Scan`, `Codecov`) após push autorizado.
