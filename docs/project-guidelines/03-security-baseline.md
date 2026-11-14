@@ -102,20 +102,20 @@ Em `next.config.ts`, a aplicação define `poweredByHeader: false`, exporta as f
 
 ## 4. Segurança de CI/CD e Vercel
 
-### Estado Atual (`VERIFICADO` / `Integrado` em `integration/security-quality` via `15e4cd6` / `aaf71f8`)
-- O arquivo `.github/workflows/build.yml` executa validação completa, scan do SonarCloud e verificação do Quality Gate (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`).
+### Estado Atual (`VERIFICADO` — Endurecido em `SEC-03` e atualizado para Node.js 26 LTS em `maintenance/node-26-lts`)
+- O arquivo `.github/workflows/build.yml` executa validação completa, scan do SonarCloud e verificação do Quality Gate (`ci`), seguidos de deploy de produção via Vercel CLI (`deploy_vercel`), operando com **runtime do projeto em Node.js `26.13.0`** (`.nvmrc` e `engines.node: "26.x"` em `package.json`) e **runtime interno das GitHub Actions em `node24` / `composite`**.
 - **Segredos (`VERIFICADO`):** Não há tokens ou credenciais hardcoded no repositório ou no histórico Git. Os segredos `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_ORGANIZATION_KEY`, `CODECOV_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID` são injetados via GitHub Actions Secrets.
 
-### Controles Obrigatórios Implementados e Integrados (`SEC-03`)
-1. **Pinning de Actions por SHA de 40 caracteres e Vercel CLI com Versão Exata:**
-   - Todas as GitHub Actions são fixadas pelo hash SHA completo de 40 caracteres do commit da release oficial, acompanhado de comentário indicando a versão:
-     - `actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`
-     - `actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0`
-     - `SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0`
-     - `SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1`
-     - `codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5`
+### Controles Obrigatórios Implementados e Integrados (`SEC-03` + Migração Node 26 LTS)
+1. **Pinning de Actions por SHA de 40 caracteres, Runtime `node24` e Vercel CLI com Versão Exata:**
+   - Todas as GitHub Actions são fixadas pelo hash SHA completo de 40 caracteres do commit da release oficial, acompanhado de comentário indicando a versão (atualizadas em `maintenance/node-26-lts` para compatibilidade com a remoção do runtime `node20` nos runners do GitHub):
+     - `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1` (`using: node24`)
+     - `actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0` (`using: node24`; configura `node-version: '26.13.0'` com `cache: npm` em `ci` e `deploy_vercel`)
+     - `SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0` (`using: node24`; verificação OpenPGP de assinatura habilitada por padrão em `ubuntu-latest`)
+     - `SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1` (`using: composite`)
+     - `codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1` (`using: composite`, com `actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0` em `node24`)
    - **Critério de Manutenção de SHAs:** Ao atualizar qualquer Action no futuro, verificar obrigatoriamente o commit dereferenciado da tag oficial via `git ls-remote https://github.com/<owner>/<repo>.git "refs/tags/<tag>*"` (usando sempre o hash `^{}` quando a tag for anotada) e atualizar o comentário da versão.
-   - **Vercel CLI:** Fixada em `npm i -g vercel@65.14.0` (sem uso de `latest` flutuante).
+   - **Vercel CLI e Plataforma Vercel:** Fixada em `npm i -g vercel@65.14.0` (sem uso de `latest` flutuante); o `package.json` declara `"engines": { "node": "26.x" }` e deve estar alinhado à seleção manual **Settings → Build and Deployment → Node.js Version (`26.x`)** no painel da Vercel (`PENDENTE` de conferência manual no painel).
 2. **Menor Privilégio no `GITHUB_TOKEN` (Zero Permissões de Escrita):**
    - Padrão global no topo do workflow: `permissions: contents: read`.
    - Job `ci`: `contents: read` e `pull-requests: read` (nenhuma permissão `write` no `GITHUB_TOKEN`).

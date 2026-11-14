@@ -21,6 +21,14 @@
 
 ---
 
+## 1.5. Ambiente de Runtime Validado (`VERIFICADO` — Node.js 26 LTS)
+
+- **Node.js (local e CI):** `v26.13.0` ([`.nvmrc`](../../.nvmrc) fixado em `26.13.0` e [`package.json`](../../package.json) declarando `"engines": { "node": "26.x" }`).
+- **npm utilizado na validação:** `11.20.0` (`npm ci` executado sem flags de contorno, instalando `470` pacotes).
+- **Observação de Compatibilidade (não bloqueante):** sob Node.js `v26.13.0`, Vitest (`4.1.12`) e Next.js (`16.4.5`) emitem o aviso `DeprecationWarning: [DEP0205] module.register() is deprecated` durante a execução local; o aviso não impacta o código de saída nem a geração de artefatos.
+
+---
+
 ## 2. Arquitetura da Suíte de Testes (`VERIFICADO`)
 
 - **Test Runner:** Vitest (`vitest.config.ts`) configurado com ambiente `jsdom` e `globals: true`.
@@ -29,13 +37,13 @@
   - Define mocks globais para `next/image` (renderizando `<img>` padrão para inspeção de atributos nos testes) e para `IntersectionObserver`.
 - **Organização:**
   - Existem **33 arquivos de teste** (`*.test.tsx` / `*.test.ts`) em `src/__tests__/`, totalizando **120 testes unitários e de integração**.
-- **Métricas Atuais de Cobertura Observadas Localmente (`VERIFICADO` em `security/sast-code-quality`):**
+- **Métricas Atuais de Cobertura Observadas Localmente (`VERIFICADO` sob Node.js `v26.13.0` / npm `11.20.0`):**
   - **Statements:** `98.76%`
   - **Branches:** `95.77%`
   - **Functions:** `100%`
   - **Lines:** `100%`
   - **`next.config.ts` (incluído no escopo do SonarCloud na `SEC-06-B`):** `100%` (Statements, Branches, Functions e Lines).
-  - *Nota:* As métricas acima representam os valores observados na execução local com Vitest/V8; elas servem como referência técnica de regressão e não devem ser assumidas como limiares configurados no servidor do SonarCloud Quality Gate (configuração externa não auditada localmente).
+  - *Nota:* As métricas acima representam os valores observados na execução local com Vitest/V8 (`npm run test:coverage -- --maxWorkers=2`); elas servem como referência técnica de regressão e não devem ser assumidas como limiares configurados no servidor do SonarCloud Quality Gate (configuração externa não auditada localmente).
 - **Alinhamento de Exclusões de Cobertura (`vitest.config.ts` ↔ `sonar-project.properties`):**
   - `vitest.config.ts` exclui `**/src/app/**`, `**/src/i18n/**`, `**/src/locales/**`, `**/src/**/data/**` e `**/src/**/constants/**` (além de artefatos de build/teste).
   - Na `SEC-06-B`, `sonar-project.properties` passou a incluir `src/app/**` em `sonar.coverage.exclusions`, alinhando o cálculo de cobertura exibido pelo SonarCloud ao escopo efetivamente medido pelo Vitest em `coverage/lcov.info`.
