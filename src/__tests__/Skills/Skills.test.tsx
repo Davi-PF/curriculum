@@ -18,6 +18,8 @@ vi.mock("../../contexts/LanguageContext", () => ({
         hardSkills: "Hard Skills",
         softSkills: "Soft Skills",
         hintText: "Toque em uma habilidade para ver detalhes",
+        skillDetailsAriaLabel: "Abrir detalhes da skill {skill}",
+        closeModalAriaLabel: "Fechar modal",
       },
     },
   }),

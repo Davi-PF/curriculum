@@ -5,7 +5,7 @@ import {
   fireEvent,
   screen,
 } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { LanguageProvider, useLanguage } from "../contexts/LanguageContext";
 import { translations } from "../i18n";
 
@@ -24,15 +24,20 @@ function TestComponent() {
 }
 
 describe("LanguageContext – Provider", () => {
-  it("should initialize with language as pt", () => {
+  beforeEach(() => {
+    document.documentElement.lang = "";
+  });
+
+  it("should initialize with language as pt and sync document.documentElement.lang", () => {
     const { result } = renderHook(() => useLanguage(), {
       wrapper: LanguageProvider,
     });
 
     expect(result.current.language).toBe("pt");
+    expect(document.documentElement.lang).toBe("pt");
   });
 
-  it("should toggle language from pt to en", () => {
+  it("should toggle language from pt to en and update document.documentElement.lang", () => {
     const { result } = renderHook(() => useLanguage(), {
       wrapper: LanguageProvider,
     });
@@ -42,19 +47,25 @@ describe("LanguageContext – Provider", () => {
     });
 
     expect(result.current.language).toBe("en");
+    expect(document.documentElement.lang).toBe("en");
   });
 
-  it("should toggle language back to pt", () => {
+  it("should toggle language back to pt and restore document.documentElement.lang", () => {
     const { result } = renderHook(() => useLanguage(), {
       wrapper: LanguageProvider,
     });
 
     act(() => {
       result.current.toggleLanguage();
+    });
+    expect(document.documentElement.lang).toBe("en");
+
+    act(() => {
       result.current.toggleLanguage();
     });
 
     expect(result.current.language).toBe("pt");
+    expect(document.documentElement.lang).toBe("pt");
   });
 
   it("should update translations when language changes", () => {
