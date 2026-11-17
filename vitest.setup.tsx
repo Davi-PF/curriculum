@@ -2,7 +2,7 @@
 
 import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
 
 type IOStore = {
   callback: IntersectionObserverCallback | null;
@@ -60,4 +60,98 @@ vi.stubGlobal(
   MockIntersectionObserver as unknown as typeof IntersectionObserver
 );
 
-vi.stubGlobal("IntersectionObserver", MockIntersectionObserver as unknown as typeof IntersectionObserver);
+type PendingDialogCloseTask = {
+  readonly dialog: HTMLDialogElement;
+  readonly run: () => void;
+  timeoutId: ReturnType<typeof setTimeout> | null;
+};
+
+const pendingDialogCloseTasks = new Set<PendingDialogCloseTask>();
+
+function cancelPendingDialogCloseTask(task: PendingDialogCloseTask) {
+  if (task.timeoutId !== null) {
+    clearTimeout(task.timeoutId);
+    task.timeoutId = null;
+  }
+}
+
+function clearPendingDialogCloseTasks() {
+  for (const task of pendingDialogCloseTasks) {
+    cancelPendingDialogCloseTask(task);
+  }
+  pendingDialogCloseTasks.clear();
+}
+
+export function flushPendingDialogCloseEvents() {
+  const tasks = Array.from(pendingDialogCloseTasks);
+  pendingDialogCloseTasks.clear();
+  for (const task of tasks) {
+    cancelPendingDialogCloseTask(task);
+    task.run();
+  }
+}
+
+const showModalMock = vi.fn(function (this: HTMLDialogElement) {
+  if (!this.hasAttribute("open")) {
+    this.setAttribute("open", "");
+  }
+});
+
+const closeModalMock = vi.fn(function (
+  this: HTMLDialogElement,
+  returnValue?: string
+) {
+  if (!this.hasAttribute("open")) {
+    return;
+  }
+  if (returnValue !== undefined) {
+    this.returnValue = returnValue;
+  }
+  this.removeAttribute("open");
+
+  let executed = false;
+  const task: PendingDialogCloseTask = {
+    dialog: this,
+    timeoutId: null,
+    run: () => {
+      if (executed) return;
+      executed = true;
+      task.timeoutId = null;
+      pendingDialogCloseTasks.delete(task);
+      task.dialog.dispatchEvent(new Event("close"));
+    },
+  };
+
+  pendingDialogCloseTasks.add(task);
+  task.timeoutId = setTimeout(task.run, 0);
+});
+
+function installDialogMocks() {
+  Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
+    configurable: true,
+    writable: true,
+    value: showModalMock,
+  });
+
+  Object.defineProperty(HTMLDialogElement.prototype, "close", {
+    configurable: true,
+    writable: true,
+    value: closeModalMock,
+  });
+}
+
+installDialogMocks();
+
+beforeEach(() => {
+  clearPendingDialogCloseTasks();
+  showModalMock.mockClear();
+  closeModalMock.mockClear();
+  installDialogMocks();
+});
+
+afterEach(() => {
+  clearPendingDialogCloseTasks();
+  document.querySelectorAll("dialog[open]").forEach((dialog) => {
+    dialog.removeAttribute("open");
+  });
+});
