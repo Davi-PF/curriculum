@@ -11,16 +11,12 @@
 O projeto adota um modelo de **branch de integração intermediária** para isolar e validar todas as melhorias de segurança, correções funcionais, performance, acessibilidade e limpeza antes de qualquer atualização na branch principal `master`.
 
 ```text
-master (e56f30f — Produção estável / Intocável durante o ciclo)
-  └── integration/security-quality (Branch base de integração das melhorias)
-        ├── docs/project-playbook            [Documentação permanente e Playbook de Agentes]
-        ├── security/dependency-updates      [SEC-01: Atualização de dependências e correção de CVEs]
-        ├── security/http-headers            [SEC-02: CSP, X-Frame-Options, nosniff, Referrer, Permissions, poweredByHeader]
-        ├── security/github-actions          [SEC-03 + CI-01..03: Hardening de workflow GitHub Actions, ESLint e SonarCloud]
-        ├── fix/functional-bugs              [BUG-01..02: Renderização de múltiplos links e ícone de website]
-        ├── perf/image-font-optimization     [PERF-01..04: Otimização de imagens, fontes, reduced-motion e scroll passivo]
-        ├── feat/accessibility-seo           [A11Y-01..06 + SEO-01..02: Lang dinâmico, ARIA, dialog, OpenGraph, sitemap/robots]
-        └── chore/project-cleanup            [CLEAN-01..05: Remoção de arquivos/deps órfãos, tipagem Education e tasks VS Code]
+master (18208bf — Produção estável / Intocável durante o ciclo)
+  └── integration/security-quality (20823a5 — Branch base de integração das melhorias)
+        ├── feat/accessibility               [P2.2-A..G: Acessibilidade, Playwright/axe-core, Contraste & Docs — Validada localmente]
+        ├── feat/seo                         [PLANEJADO: SEO-01..02 segregados fora de feat/accessibility]
+        ├── perf/image-font-optimization     [PLANEJADO: PERF-01..04]
+        └── chore/project-cleanup            [PLANEJADO: CLEAN-01..05]
 ```
 
 ---
@@ -29,15 +25,20 @@ master (e56f30f — Produção estável / Intocável durante o ciclo)
 
 | Branch | Estado no Git | Escopo Exclusivo | Status do Trabalho |
 | :--- | :--- | :--- | :--- |
-| `master` | Existente (`local` + `origin/master` em `e56f30f`) | Versão estável de produção. | **Intacta (`VERIFICADO`)**. Nenhuma alteração direta permitida. |
-| `integration/security-quality` | Existente (`local` + `origin/integration/security-quality` em `2203a72`) | Concentrar e validar a integração das branches temáticas antes do merge final em `master`. | **Ativa (`VERIFICADO`)**. Contém `security/dependency-updates` (`5f0cf3f`), `docs/project-playbook` (`2ec4e1b`) e `security/http-headers` (`fbb64d9`). |
+| `master` | Existente (`local` + `origin/master` em `18208bf`) | Versão estável de produção. | **Intacta (`VERIFICADO`)**. Nenhuma alteração direta permitida. |
+| `integration/security-quality` | Existente (`local` + `origin/integration/security-quality` em `20823a5`) | Concentrar e validar a integração das branches temáticas antes do merge final em `master`. | **Ativa (`VERIFICADO`)**. Base atual de `feat/accessibility` (`20823a5`). |
 | `docs/project-playbook` | Existente (`local` em `2ec4e1b`) | Criação e manutenção de `AGENTS.md` e `docs/project-guidelines/*.md`. | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
 | `security/dependency-updates` | Existente (`local` em `5f0cf3f`) | Atualização segura de dependências (`next@16.4.5`, `vitest@4.1.12`, etc.) para mitigar `[SEC-01]`. | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
 | `security/http-headers` | Existente (`local` em `fbb64d9`) | Implementação dos cabeçalhos HTTP de segurança e `poweredByHeader: false` em `next.config.ts` (`[SEC-02]`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
-| `security/github-actions` | Existente (`local`, criada a partir de `2203a72`) | Hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` no ESLint e correção de `sonar-project.properties` (`[SEC-03]` e `CI-01..03`). | **Implementada e Validada localmente (`VERIFICADO`)**, aguardando aprovação de merge em `integration/security-quality`. |
-| `fix/functional-bugs` | `PLANEJADO` | Correção de `ExperienceActivityItem.tsx` (múltiplos links) e `ActivityLink.ts` (ícone `website`). | Pendente de criação. |
+| `security/github-actions` | Existente (`local` em `15e4cd6`) | Hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` no ESLint e correção de `sonar-project.properties` (`[SEC-03]` e `CI-01..03`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
+| `security/content-security-policy` | Existente (`local` em `3428e7f`) | Refinamento da CSP para menor privilégio compatível com SSG (`[SEC-04]`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
+| `security/privacy-audit` | Existente (`local` em `e95d19b`) | Auditoria de privacidade e minimização de URL em `SharePageButton.tsx` (`[SEC-05]`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
+| `security/sast-code-quality` | Existente (`local` em `0a62c19`) | Regras preventivas ESLint 9 e estratégia SAST/SonarCloud (`[SEC-06]`). | **Integrada em `integration/security-quality` (`VERIFICADO`)**. |
+| `fix/functional-bugs` | Existente (`local` em `cc039b4`) | Correção de `ExperienceActivityItem.tsx` (múltiplos links) e `ActivityLink.ts` (ícone `website`). | **Integrada em `integration/security-quality` (`VERIFICADO` — merge `20823a5`)**. |
+| `maintenance/node-26-lts` | Existente (`local` em `4322741`) | Padronização Node.js `26.13.0` / `26.x` e Actions `node24` (`ADR-010`). | **Existente localmente (`VERIFICADO`)**. |
+| `feat/accessibility` | Existente (`local`, HEAD atual `20823a5` com alterações locais não commitadas) | Programa `P2.2`: i18n `lang`, `SkillModal`, `ExperienceTabs`, `Header`/`LanguageSwitcher`, Playwright + `axe-core`, contraste/hover e alinhamento documental (`A11Y-01..05`). | **Validada localmente na branch temática (`VERIFICADO` — `P2.2-A..G`)**. **Não houve commit, merge, push ou deploy**; integração futura destinada a `integration/security-quality` somente mediante autorização explícita. |
+| `feat/seo` *(anteriormente agrupada como `feat/accessibility-seo`)* | `PLANEJADO` | Metadados Open Graph, Twitter Card, `sitemap.ts` e `robots.ts` (`SEO-01..02`). | Pendente (fora do escopo da iniciativa `P2.2`). |
 | `perf/image-font-optimization` | `PLANEJADO` | Redimensionamento de imagens pesadas, `sizes` em `HeaderAvatar`, limpeza de fontes, `prefers-reduced-motion` e scroll `{ passive: true }`. | Pendente de criação. |
-| `feat/accessibility-seo` | `PLANEJADO` | Sincronização de `<html lang>`, i18n de `aria-label`, acessibilidade de `SkillModal` e `ExperienceTabs`, Open Graph e `sitemap.ts`/`robots.ts`. | Pendente de criação. |
 | `chore/project-cleanup` | `PLANEJADO` | Remoção de `next-themes`, `jest.*`, `ContactToast`, SVGs não usados, chaves i18n órfãs e ajustes de `tsconfig.json`/`.vscode/tasks.json`. | Pendente de criação. |
 
 ---
