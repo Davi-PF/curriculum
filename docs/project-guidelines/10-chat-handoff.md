@@ -57,21 +57,30 @@ Antes de realizar qualquer alteração ou propor código, leia obrigatoriamente 
 
 ---
 
-## 3. Fotografia do Estado Atual para a Próxima Sessão (`VERIFICADO` em 2026-11-09)
+## 3. Fotografia do Estado Atual (`P2.2 — Acessibilidade` na branch `feat/accessibility`)
 
-O estado exato do repositório após a integração de `[SEC-01]`, do Playbook e de `[SEC-02]` é:
+- **Branch temática em curso:** `feat/accessibility` (HEAD de referência: `20823a5d21d1f0009965fe086edb37b4b21e8820`, baseada em `integration/security-quality`).
+- **Branch de destino planejada:** `integration/security-quality` (`master` em `18208bf` permanece intocada).
+- **Situação Git / Publicação:** todas as alterações do programa `P2.2` permanecem **exclusivamente locais** no working tree de `feat/accessibility`. **Não houve commit, merge, push nem deploy.**
+- **Etapas Concluídas na Iniciativa `P2.2`:**
+  - **`P2.2-A` até `P2.2-E3`:** concluídas e validadas localmente (`i18n`/`<html lang>`, `SkillModal` com `<dialog>` nativo, `ExperienceTabs` WAI-ARIA, `Header`/`LanguageSwitcher`, auditoria de `.hintrc`, avaliação de tooling, integração Playwright + `axe-core` e CI `a11y_e2e`, remediação de WCAG 2.5.3, contraste `:root` `#1c1917` e estados `:hover` validados em Chromium Desktop/Mobile).
+  - **`P2.2-F` (Auditoria Consolidada):** concluída com classificação **Readiness B — Ready with Caveats** (`npx tsc --noEmit`, `npm run lint`, `npm run test:coverage -- --maxWorkers=2` [`35` arquivos, `171` testes, `99.12%` Stmts / `95.65%` Branches / `100%` Funcs / `100%` Lines], `npm run build`, `npm run test:a11y` [`7/7`, `0` violações, `0` incompletos] e `git diff --check` todos aprovados).
+  - **`P2.2-G` (Alinhamento Documental):** atualizados os documentos `05`, `06`, `08`, `09` (`ADR-011`) e `10`, pendente de revisão técnica e aprovação explícita antes de qualquer operação Git.
+- **Ressalvas e Limitações Abertas (`Readiness B`):**
+  1. `npm audit` retorna **código de saída `1`** com `7` ocorrências moderadas relacionadas a `minimatch` exclusivamente em `devDependencies` (`@typescript-eslint`), aceitas temporariamente conforme `ADR-004` (`0` críticas/altas/runtime).
+  2. `.hintrc` permanece como arquivo legado contendo `"axe/aria": "off"`, sem Webhint instalado, executável ou integrado em CI.
+  3. O novo job remoto `a11y_e2e` em `.github/workflows/build.yml` ainda não teve execução confirmada em runner Ubuntu remoto.
+  4. Limitações inerentes ao `axe-core` (não avalia adequadamente estados transitórios de `:hover` nem substitui inspeção visual sobre gradientes/pseudo-elementos) e ausência de validação manual real com leitores de tela (NVDA, VoiceOver, TalkBack) e zoom extremo (`200%`/`400%`).
+  5. Melhorias não bloqueantes identificadas na `P2.2-F` (`ring-offset` em `SkillButton.tsx`, `scroll-margin-top` em painéis de experiência e ampliação opcional do E2E), mantidas fora do escopo atual.
+  6. `SEO-01` e `SEO-02` seguem fora do escopo de `feat/accessibility` (`PENDENTE` para frente dedicada).
+- **Próximos Passos Planejados:**
+  1. Revisão técnica da documentação atualizada na `P2.2-G`.
+  2. Planejamento da integração local da branch temática `feat/accessibility`.
+  3. Integração em `integration/security-quality` **somente após aprovação explícita do usuário**.
+  4. Execução do pipeline remoto no GitHub Actions para validar o job `a11y_e2e` em runner Ubuntu.
+  5. Avaliação posterior dos resultados da CI remota e decisão separada sobre eventual publicação/deploy na Vercel.
 
-- **Branch `master`:** Intacta no commit `e56f30f` (`[origin/master]`).
-- **Branch `integration/security-quality`:** Contém as integrações validadas de:
-  - `security/dependency-updates` (`5f0cf3f`) — `[SEC-01]` (`Integrado`)
-  - `docs/project-playbook` (`2ec4e1b`) — Playbook Técnico e de Segurança (`Integrado`)
-  - `security/http-headers` (`fbb64d9`, merge `c872bc0`) — `[SEC-02]` Cabeçalhos HTTP e `poweredByHeader: false` (`Integrado`)
-- **Próximas branches temáticas pendentes na fila (a criar a partir de `integration/security-quality`):**
-  1. `security/github-actions`: implementar `[SEC-03]` e `CI-01..03` (hardening de `.github/workflows/build.yml`, exclusão de `coverage/**` em `eslint.config.mjs` e correção de duplicidade em `sonar-project.properties`).
-  2. `fix/functional-bugs`: implementar `BUG-01` e `BUG-02` (`ExperienceActivityItem.tsx` e `ActivityLink.ts`).
-  3. `perf/image-font-optimization`: implementar `PERF-01..04`.
-  4. `feat/accessibility-seo`: implementar `A11Y-01..05` e `SEO-01..02`.
-  5. `chore/project-cleanup`: implementar `CLEAN-01..05`.
+*(Referência histórica anterior ao ciclo P2.2 preservada em `08-security-findings-and-risks.md` e `09-technical-decisions.md`.)*
 
 ---
 

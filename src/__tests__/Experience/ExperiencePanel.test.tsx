@@ -119,4 +119,34 @@ describe("ExperiencePanel", () => {
     expect(screen.queryByTestId("activity-item")).not.toBeInTheDocument();
     expect(activityItemSpy).not.toHaveBeenCalled();
   });
+
+  it("renders with role tabpanel and applies id and aria-labelledby when provided", () => {
+    const experience: ExperienceItem = {
+      id: "4",
+      logo: "/w.png",
+      company: "Delta",
+      title: "Staff Engineer",
+      period: "2024",
+      description: "Arquitetura de sistemas.",
+      activities: [],
+    };
+
+    render(
+      <div>
+        <button id="exp-tab-0" type="button" role="tab" aria-selected="true">
+          Delta
+        </button>
+        <ExperiencePanel
+          experience={experience}
+          id="exp-panel-0"
+          labelledBy="exp-tab-0"
+        />
+      </div>,
+    );
+
+    const panel = screen.getByRole("tabpanel", { name: "Delta" });
+    expect(panel).toHaveAttribute("id", "exp-panel-0");
+    expect(panel).toHaveAttribute("aria-labelledby", "exp-tab-0");
+    expect(panel).toHaveAttribute("tabindex", "0");
+  });
 });

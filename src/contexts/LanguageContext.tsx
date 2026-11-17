@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react';
 import { Language } from '../types/language';
 import { translations } from '../i18n';
 
@@ -14,6 +14,10 @@ const LanguageContext = createContext<LanguageContextData | null>(null);
 
 export function LanguageProvider({ children }: { readonly children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('pt');
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   function toggleLanguage() {
     setLanguage((prev) => (prev === 'pt' ? 'en' : 'pt'));

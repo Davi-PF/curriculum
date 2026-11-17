@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
@@ -7,6 +7,13 @@ export default defineConfig({
     setupFiles: "./vitest.setup.tsx",
     // evita child_process (forks) que dá EPERM no Windows
     pool: "forks",
+    exclude: [
+      ...configDefaults.exclude,
+      "**/e2e/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "**/.next/**",
+    ],
 
     coverage: {
       provider: "v8",

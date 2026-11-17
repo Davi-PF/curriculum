@@ -1,12 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 interface HeaderAvatarProps {
   readonly isScrolled: boolean;
 }
 
 export function HeaderAvatar({ isScrolled }: HeaderAvatarProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="justify-self-end pr-4.5">
       <div
@@ -23,7 +26,7 @@ export function HeaderAvatar({ isScrolled }: HeaderAvatarProps) {
       >
         <Image
           src="/images/profile.jpg"
-          alt="Foto de perfil"
+          alt={t.header.avatarAlt}
           fill
           className="object-cover object-[center_18%] border border-emerald-500 rounded-full"
           priority

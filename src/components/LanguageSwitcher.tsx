@@ -15,8 +15,8 @@ export function LanguageSwitcher({ isScrolled = false }: LanguageSwitcherProps) 
   return (
     <button
       type="button"
-      aria-pressed={isEnglish}
-      aria-label={isPortuguese ? "Switch to English" : "Mudar para Português"}
+      lang={isPortuguese ? "en" : "pt"}
+      aria-label={isPortuguese ? "EN — Switch to English" : "PT — Mudar para Português"}
       onClick={toggleLanguage}
       className={`
         relative
@@ -30,7 +30,7 @@ export function LanguageSwitcher({ isScrolled = false }: LanguageSwitcherProps) 
         transition-all duration-300 ease-out
         hover:border-emerald-300/80
         focus-visible:outline-none
-        focus-visible:ring-2 focus-visible:ring-emerald-400/60
+        focus-visible:ring-2 focus-visible:ring-emerald-300
         ${isScrolled ? "scale-87" : "scale-100"}
       `}
     >

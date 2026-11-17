@@ -19,7 +19,7 @@ export default function About() {
             text={t.about.description}
             clampLines={3}
             key={t.about.title}
-            className="text-emerald-500"
+            className="text-emerald-400"
           />
         </div>
       </div>

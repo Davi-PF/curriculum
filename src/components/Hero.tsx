@@ -15,8 +15,8 @@ export default function Hero() {
         </div>
 
         <div className="inline-block bg-stone-600/35 inset-ring-1 inset-ring-stone-700/40 p-4 sm:p-6 rounded-xl shadow-lg relative mb-2">
-          <p className="text-lg text-emerald-500">{t.hero.subtitle}</p>
-          <p className="text-emerald-600 italic antialiased">
+          <p className="text-lg text-emerald-400">{t.hero.subtitle}</p>
+          <p className="text-emerald-400 italic antialiased">
             &quot;{t.hero.quote}&quot;
           </p>
         </div>

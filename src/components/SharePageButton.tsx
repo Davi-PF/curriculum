@@ -26,12 +26,14 @@ function getCanonicalPageUrl(): string {
 
 export default function SharePageButton({
   url,
-  title = "Currículo / Portfólio",
-  text = "Confira meu currículo/portfólio:",
+  title,
+  text,
   className = "",
 }: Props) {
   const [status, setStatus] = useState<Status>("idle"); 
   const { t } = useLanguage();
+  const resolvedTitle = title ?? t.shareButtonStatus.title;
+  const resolvedText = text ?? t.shareButtonStatus.text;
 
   const shareUrl = useMemo(() => {
     if (url) return url;
@@ -45,8 +47,8 @@ export default function SharePageButton({
       // 1) Web Share API
       if (typeof navigator !== "undefined" && "share" in navigator) {
         await (navigator as Navigator & { share: (data: ShareData) => Promise<void> }).share({
-          title,
-          text,
+          title: resolvedTitle,
+          text: resolvedText,
           url: finalUrl,
         });
         setStatus("shared");
@@ -61,7 +63,7 @@ export default function SharePageButton({
       }
 
       // 3) Último fallback
-      globalThis.prompt("Copie o link:", finalUrl);
+      globalThis.prompt(t.shareButtonStatus.prompt, finalUrl);
       setStatus("copied");
     } catch {
       setStatus("error");
@@ -88,13 +90,13 @@ export default function SharePageButton({
         bg-stone-200/20
         inset-ring-1 inset-ring-stone-600
         rounded-full shadow-lg
-        hover:bg-stone-400/50
+        hover:bg-stone-700/60
         transition-colors
         px-5 py-2
-        text-lg font-semibold text-emerald-400
+        text-lg font-semibold text-emerald-300
         ${className}
       `}
-      aria-label="Compartilhar link da página"
+      aria-label={t.shareButtonStatus.ariaLabel}
     >
       {label}
     </button>

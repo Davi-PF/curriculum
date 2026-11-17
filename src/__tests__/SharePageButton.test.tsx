@@ -11,6 +11,10 @@ async function flushPromises(times = 2) {
 
 type TTranslations = {
   shareButtonStatus: {
+    title: string;
+    text: string;
+    ariaLabel: string;
+    prompt: string;
     share: string;
     copied: string;
     shared: string;
@@ -18,17 +22,37 @@ type TTranslations = {
   };
 };
 
-const tMock: TTranslations = {
-  shareButtonStatus: {
-    share: "Compartilhar",
-    copied: "Copiado!",
-    shared: "Compartilhado!",
-    error: "Erro",
+const translationsByLanguage: Record<"pt" | "en", TTranslations> = {
+  pt: {
+    shareButtonStatus: {
+      title: "Currículo do Davi Prudente Ferreira",
+      text: "Confira o currículo de:",
+      ariaLabel: "Compartilhar link da página",
+      prompt: "Copie o link:",
+      share: "Compartilhar",
+      copied: "Copiado!",
+      shared: "Compartilhado!",
+      error: "Erro",
+    },
+  },
+  en: {
+    shareButtonStatus: {
+      title: "Davi Prudente Ferreira's Resume",
+      text: "Check out the resume of:",
+      ariaLabel: "Share page link",
+      prompt: "Copy the link:",
+      share: "Share",
+      copied: "Link copied!",
+      shared: "Page shared!",
+      error: "Error",
+    },
   },
 };
 
+let currentLang: "pt" | "en" = "pt";
+
 vi.mock("../contexts/LanguageContext", () => ({
-  useLanguage: () => ({ t: tMock }),
+  useLanguage: () => ({ t: translationsByLanguage[currentLang] }),
 }));
 
 type ShareFn = (data: ShareData) => Promise<void>;
@@ -102,6 +126,7 @@ describe("SharePageButton", () => {
   const originalPrompt = globalThis.prompt;
 
   beforeEach(() => {
+    currentLang = "pt";
     vi.restoreAllMocks();
     setLocationHref("https://example.com/current");
     patchNavigator({});
@@ -156,9 +181,58 @@ describe("SharePageButton", () => {
 
       await waitFor(() => {
         expect(shareMock).toHaveBeenCalledWith(
-          expect.objectContaining({ url: "https://example.com/current" })
+          expect.objectContaining({
+            title: "Currículo do Davi Prudente Ferreira",
+            text: "Confira o currículo de:",
+            url: "https://example.com/current",
+          })
         );
       });
+    });
+
+    it("usa title e text explícitos quando fornecidos via props", async () => {
+      const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
+      patchNavigator({ share: shareMock });
+
+      render(
+        <SharePageButton
+          url="https://example.com/custom"
+          title="Título Customizado"
+          text="Texto Customizado"
+        />
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Compartilhar link da página" })
+      );
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith({
+          title: "Título Customizado",
+          text: "Texto Customizado",
+          url: "https://example.com/custom",
+        });
+      });
+    });
+
+    it("usa aria-label, title e text padrão em inglês quando idioma é en", async () => {
+      currentLang = "en";
+      const shareMock = vi.fn<ShareFn>().mockResolvedValue(undefined);
+      patchNavigator({ share: shareMock });
+
+      render(<SharePageButton url="https://example.com/en" />);
+      const button = screen.getByRole("button", { name: "Share page link" });
+      expect(button).toHaveTextContent("Share");
+
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(shareMock).toHaveBeenCalledWith({
+          title: "Davi Prudente Ferreira's Resume",
+          text: "Check out the resume of:",
+          url: "https://example.com/en",
+        });
+      });
+      expect(button).toHaveTextContent("Page shared!");
     });
 
     it("descarta query string e fragmento da URL atual ao compartilhar (SEC-05)", async () => {
@@ -239,6 +313,26 @@ describe("SharePageButton", () => {
 
       expect(button).toHaveTextContent("Copiado!");
     });
+
+    it("usa mensagem do prompt e aria-label em inglês quando idioma é en", async () => {
+      currentLang = "en";
+      const promptMock = vi.fn(() => null);
+      patchPrompt(promptMock);
+      patchNavigator({});
+
+      render(<SharePageButton url="https://example.com/prompt-en" />);
+      const button = screen.getByRole("button", { name: "Share page link" });
+      fireEvent.click(button);
+
+      await waitFor(() =>
+        expect(promptMock).toHaveBeenCalledWith(
+          "Copy the link:",
+          "https://example.com/prompt-en"
+        )
+      );
+
+      expect(button).toHaveTextContent("Link copied!");
+    });
   });
 
   describe("Reset de status", () => {
@@ -292,6 +386,19 @@ describe("SharePageButton", () => {
       fireEvent.click(button);
 
       await waitFor(() => expect(writeTextMock).toHaveBeenCalledTimes(1));
+    });
+
+    it("mantém classes de contraste acessível no estado normal e hover", () => {
+      render(<SharePageButton />);
+
+      const button = screen.getByRole("button", {
+        name: "Compartilhar link da página",
+      });
+
+      expect(button.className).toContain("bg-stone-200/20");
+      expect(button.className).toContain("hover:bg-stone-700/60");
+      expect(button.className).not.toContain("hover:bg-stone-400/50");
+      expect(button.className).toContain("text-emerald-300");
     });
   });
 });

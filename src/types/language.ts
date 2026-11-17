@@ -3,6 +3,7 @@ export type Language = "pt" | "en";
 export interface Translations {
   header: {
     title: string;
+    avatarAlt: string;
   };
   navbar: {
     home: string;
@@ -25,6 +26,8 @@ export interface Translations {
     softSkills: string;
     description: string;
     hintText: string;
+    skillDetailsAriaLabel: string;
+    closeModalAriaLabel: string;
   };
   about: {
     title: string;
@@ -60,6 +63,8 @@ export interface Translations {
     id: string;
     title: string;
     text: string;
+    ariaLabel: string;
+    prompt: string;
     share: string;
     copied: string;
     shared: string;

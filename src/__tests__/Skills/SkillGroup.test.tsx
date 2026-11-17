@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import type { Skill } from "../../types/skill";
 import { SkillGroup } from "../../components/Skills/SkillGroup";
+import { LanguageProvider } from "../../contexts/LanguageContext";
+import { renderWithLanguage } from "../test-utils";
 
 // Mock do SkillButton para o teste ser unitário do SkillGroup
 vi.mock("@/src/components/Skills/SkillButton", () => ({
@@ -29,7 +31,7 @@ describe("SkillGroup", () => {
       makeSkill("hard-ts", "TypeScript"),
     ];
 
-    render(
+    renderWithLanguage(
       <SkillGroup
         title="Hard Skills"
         skills={skills}
@@ -51,7 +53,7 @@ describe("SkillGroup", () => {
       makeSkill("hard-ts", "TypeScript", "Linguagem tipada"),
     ];
 
-    render(
+    renderWithLanguage(
       <SkillGroup
         title="Hard Skills"
         skills={skills}
@@ -70,7 +72,7 @@ describe("SkillGroup", () => {
   it("exibe o hintText quando showHint=true e oculta quando showHint=false", () => {
     const skills: Skill[] = [makeSkill("hard-react", "React")];
 
-    const { rerender } = render(
+    const { rerender } = renderWithLanguage(
       <SkillGroup
         title="Hard Skills"
         skills={skills}
@@ -84,13 +86,15 @@ describe("SkillGroup", () => {
     expect(hint).toHaveAttribute("hidden");
 
     rerender(
-      <SkillGroup
-        title="Hard Skills"
-        skills={skills}
-        showHint={true}
-        hintText="Toque em uma habilidade para ver detalhes"
-        onSkillClick={vi.fn()}
-      />
+      <LanguageProvider>
+        <SkillGroup
+          title="Hard Skills"
+          skills={skills}
+          showHint={true}
+          hintText="Toque em uma habilidade para ver detalhes"
+          onSkillClick={vi.fn()}
+        />
+      </LanguageProvider>
     );
 
     expect(screen.getByText("Toque em uma habilidade para ver detalhes")).not.toHaveAttribute("hidden");
@@ -99,7 +103,7 @@ describe("SkillGroup", () => {
   it("aplica classes de glow no título quando showHint=true", () => {
     const skills: Skill[] = [makeSkill("hard-react", "React")];
 
-    render(
+    renderWithLanguage(
       <SkillGroup
         title="Hard Skills"
         skills={skills}
@@ -121,7 +125,7 @@ describe("SkillGroup", () => {
   it("aplica className no wrapper externo", () => {
     const skills: Skill[] = [makeSkill("hard-react", "React")];
 
-    const { container } = render(
+    const { container } = renderWithLanguage(
       <SkillGroup
         title="Hard Skills"
         skills={skills}

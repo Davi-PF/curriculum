@@ -3,6 +3,7 @@ import { Translations } from "../types/language";
 export const en: Translations = {
   header: {
     title: "Davi Prudente Ferreira",
+    avatarAlt: "Profile photo",
   },
   navbar: {
     home: "Home",
@@ -25,6 +26,8 @@ export const en: Translations = {
     softSkills: "Soft Skills",
     description: "Here are some of my main skills and competencies.",
     hintText: "Click on a skill to see more details.",
+    skillDetailsAriaLabel: "Open details for {skill}",
+    closeModalAriaLabel: "Close modal",
   },
   about: {
     title: "About Me",
@@ -61,6 +64,8 @@ export const en: Translations = {
     id: "share-page-button",
     title: "Davi Prudente Ferreira's Resume",
     text: "Check out the resume of:",
+    ariaLabel: "Share page link",
+    prompt: "Copy the link:",
     share: "Share",
     copied: "Link copied to clipboard!",
     shared: "Page shared successfully!",

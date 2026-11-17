@@ -3,6 +3,7 @@ import { Translations } from "../types/language";
 export const pt: Translations = {
   header: {
     title: "Davi Prudente Ferreira",
+    avatarAlt: "Foto de perfil",
   },
   navbar: {
     home: "Início",
@@ -26,6 +27,8 @@ export const pt: Translations = {
     description:
       "Aqui estão algumas das minhas principais habilidades e competências.",
     hintText: "Clique em uma habilidade para ver mais detalhes.",
+    skillDetailsAriaLabel: "Abrir detalhes da skill {skill}",
+    closeModalAriaLabel: "Fechar modal",
   },
   about: {
     title: "Sobre Mim",
@@ -63,6 +66,8 @@ export const pt: Translations = {
     id: "share-page-button",
     title: "Currículo do Davi Prudente Ferreira",
     text: "Confira o currículo de:",
+    ariaLabel: "Compartilhar link da página",
+    prompt: "Copie o link:",
     share: "Compartilhar",
     copied: "Link copiado para a área de transferência!",
     shared: "Página compartilhada com sucesso!",

@@ -26,7 +26,7 @@ export function FormationItem({ item }: FormationItemProps) {
 
       {/* Card */}
       <div className="ml-8 md:ml-0 md:mt-12 bg-stone-800/50 rounded-lg p-4 shadow-sm hover:bg-stone-800/60 transition-color mb-3">
-        <time className="block text-sm text-emerald-400/80 mb-1">
+        <time className="block text-sm text-emerald-300/90 mb-1">
           {item.period}
         </time>
 
@@ -34,7 +34,7 @@ export function FormationItem({ item }: FormationItemProps) {
           {item.title}
         </h3>
 
-        <p className="text-sm text-emerald-400/90">
+        <p className="text-sm text-emerald-300/90">
           {item.institution}
         </p>
 
@@ -42,7 +42,7 @@ export function FormationItem({ item }: FormationItemProps) {
           <ExpandableText
             text={item.description}
             clampLines={2}
-            className="mt-2 text-sm text-emerald-400/70"
+            className="mt-2 text-sm text-emerald-400"
           />
         )}
       </div>
