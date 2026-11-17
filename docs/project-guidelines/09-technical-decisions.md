@@ -146,8 +146,8 @@ Este documento registra as decisões arquiteturais e operacionais tomadas no rep
 
 ## ADR-011: Decisões de Acessibilidade, Tooling E2E (`Playwright + axe-core`) e Remediação de Contraste (`P2.2`)
 
-- **Data:** 2026-11-17 (`Validado` localmente em `feat/accessibility`, aguardando integração)
-- **Status:** Accepted *(pendente de integração em `integration/security-quality`)*
+- **Data:** 2026-11-17 (`Integrado` localmente em `integration/security-quality` via merge `--no-ff` `a0d9260` a partir de `feat/accessibility` @ `cbc0425`; não `Publicado`)
+- **Status:** Accepted *(`Integrado` localmente em `integration/security-quality`; primeira execução remota do job `a11y_e2e` e publicação pendentes)*
 - **Contexto:** O programa `P2.2` visou corrigir barreiras de acessibilidade mapeadas em `A11Y-01` a `A11Y-05` sem adicionar bibliotecas de componentes UI externas (`ADR-005`), além de estabelecer verificação automatizada confiável em CI para Next.js 16.4.5 App Router (SSG) com React 19.2.3 e Tailwind CSS v4 sobre fundo com gradiente animado (`body::before`) e superfícies translúcidas (`backdrop-blur-sm`).
 - **Decisões Tomadas:**
   1. **Elemento nativo `<dialog>` para `SkillModal`:** Utilizar `<dialog>` nativo montado via `createPortal(..., document.body)` com `.showModal()`, `aria-modal="true"`, `aria-labelledby`/`aria-describedby`, botão único de fechamento com foco inicial, interceptação de `Escape` (`onCancel`), fechamento por clique no backdrop, controle de eventos assíncronos de fechamento (`pendingProgrammaticClosesRef`) e restauração explícita de foco ao disparador (`openerRef`), evitando bibliotecas externas de modal.

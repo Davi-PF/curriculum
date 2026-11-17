@@ -26,7 +26,7 @@
 
 - **Node.js (local e CI):** `v26.13.0` ([`.nvmrc`](../../.nvmrc) fixado em `26.13.0` e [`package.json`](../../package.json) declarando `"engines": { "node": "26.x" }`).
 - **npm utilizado na validação:** `11.20.0` (`npm ci` executado sem flags de contorno, instalando `470` pacotes).
-- **Observação de Compatibilidade (não bloqueante):** sob Node.js `v26.13.0`, Vitest (`4.1.12`) e Next.js (`16.4.5`) emitem o aviso `DeprecationWarning: [DEP0205] module.register() is deprecated` durante a execução local; o aviso não impacta o código de saída nem a geração de artefatos.
+- **Observação de Compatibilidade (não bloqueante):** sob Node.js `v26.13.0`, Vitest (`4.1.12`) e Next.js (`16.4.5`) emitem o aviso `DeprecationWarning: [DEP0205] module.register() is deprecated` e o Vitest exibe aviso informativo de sintaxe ESM em `vitest.config.ts` (`configLoader: 'native'`); ambos não impactam o código de saída nem a geração de artefatos.
 
 ---
 
@@ -38,7 +38,7 @@
   - Define mocks globais para `next/image` (renderizando `<img>` padrão para inspeção de atributos nos testes) e para `IntersectionObserver`.
 - **Organização:**
   - Existem **35 arquivos de teste** (`*.test.tsx` / `*.test.ts`) em `src/__tests__/`, totalizando **171 testes unitários e de integração** no Vitest, além de **`e2e/accessibility.spec.ts` (`7` testes E2E)** executado separadamente via Playwright (`npm run test:a11y`).
-- **Métricas Atuais de Cobertura Observadas Localmente (`VERIFICADO` na branch `feat/accessibility` sob Node.js `v26.13.0` / npm `11.20.0`):**
+- **Métricas Atuais de Cobertura Observadas Localmente (`VERIFICADO` em `integration/security-quality` @ `a0d9260` após merge de `feat/accessibility` @ `cbc0425`, sob Node.js `v26.13.0` / npm `11.20.0`):**
   - **Statements:** `99.12%`
   - **Branches:** `95.65%`
   - **Functions:** `100%`
@@ -75,7 +75,7 @@ npm run lint
 ```bash
 npm run test:coverage
 ```
-- **Critério de aprovação:** 100% das suítes e testes passando (`35` arquivos, `171` testes na `feat/accessibility`), geração bem-sucedida de `coverage/lcov.info` e ausência de regressão nas métricas de cobertura.
+- **Critério de aprovação:** 100% das suítes e testes passando (`35` arquivos, `171` testes em `integration/security-quality` @ `a0d9260`), geração bem-sucedida de `coverage/lcov.info` e ausência de regressão nas métricas de cobertura.
 - **Nota Operacional em Windows:** Em ambientes Windows locais com contenção de CPU ou processos paralelos de workers, o comando equivalente com paralelismo limitado `npm run test:coverage -- --maxWorkers=2` evita *timeouts* de inicialização sem alterar `vitest.config.ts` nem os resultados de cobertura.
 
 ### 4. Build de Produção
@@ -89,7 +89,7 @@ npm run build
 - No workflow [`.github/workflows/build.yml`](../../.github/workflows/build.yml), após a sequência local equivalente (`npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm run test:coverage`, `npm run build`), o job `ci` executa `SonarQube Scan` e `SonarCloud Quality Gate` (em `pull_request` e em `push` para `master`), consumindo centralizadamente [`sonar-project.properties`](../../sonar-project.properties) (`sonar.sources=src,next.config.ts` e `sonar.javascript.lcov.reportPaths=coverage/lcov.info`).
 - **Pendência de Confirmação Remota:** As alterações em `sonar-project.properties` (`SEC-06-B`) e o novo job `a11y_e2e` em `.github/workflows/build.yml` (`P2.2-E2`) foram validados localmente; a confirmação da indexação efetiva de `next.config.ts`, da importação de `coverage/lcov.info` no SonarCloud e da execução do job `a11y_e2e` em runner Ubuntu remoto depende da próxima execução autorizada da pipeline no GitHub Actions.
 
-### 6. Última Bateria Consolidada Observada (`P2.2-F` em `feat/accessibility`)
+### 6. Última Bateria Consolidada Observada (Pós-Merge `P2.2` em `integration/security-quality` @ `a0d9260`)
 
 | Verificação | Resultado observado |
 | :--- | :--- |

@@ -1,7 +1,7 @@
 # Playbook Técnico, de Segurança e Continuidade do Projeto
 
-- **Última revisão:** `2026-11-09`
-- **Situação da documentação:** `Completa` (`VERIFICADO` contra `integration/security-quality` após integração de `security/dependency-updates` @ `5f0cf3f`, `docs/project-playbook` @ `2ec4e1b` e `security/http-headers` @ `fbb64d9`)
+- **Última revisão:** `2026-11-17`
+- **Situação da documentação:** `Completa` (`VERIFICADO` contra `integration/security-quality` @ `a0d9260` após integração local de `feat/accessibility` @ `cbc0425`; não publicada em produção)
 
 ---
 
@@ -29,8 +29,9 @@ Seu propósito é:
 | [`06-testing-and-validation.md`](06-testing-and-validation.md) | Scripts reais do `package.json`, procedimentos de teste unitário, cobertura, lint, typecheck, build e inspeção HTTP/DAST. |
 | [`07-dependency-management.md`](07-dependency-management.md) | Política de adição e atualização de pacotes, uso de `npm audit`, análise de breaking changes e tratamento de transitivas. |
 | [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) | Registro rastreável de todas as vulnerabilidades (`SEC-*`) e melhorias técnicas (`BUG-*`, `PERF-*`, `A11Y-*`, `SEO-*`, `CI-*`, `CLEAN-*`) com status real. |
-| [`09-technical-decisions.md`](09-technical-decisions.md) | Registro histórico de decisões arquiteturais e técnicas (ADRs simplificados `ADR-001` a `ADR-006`). |
+| [`09-technical-decisions.md`](09-technical-decisions.md) | Registro histórico de decisões arquiteturais e técnicas (ADRs simplificados `ADR-001` a `ADR-011` e referência a `decisions/ADR-009`). |
 | [`10-chat-handoff.md`](10-chat-handoff.md) | Guia de transição entre conversas e template de prompt pronto para iniciar novas sessões com agentes de IA. |
+| [`11-atomic-commits-and-change-tracking.md`](11-atomic-commits-and-change-tracking.md) | Política permanente de commits atômicos, convenção Conventional Commits, fluxo pré-commit e rastreabilidade entre commits e etapas. |
 
 ---
 
@@ -39,7 +40,7 @@ Seu propósito é:
 Para um agente de IA ou desenvolvedor que está iniciando uma sessão no projeto:
 
 1. **Entrada e Regras Gerais:** [`/AGENTS.md`](../../AGENTS.md) → [`README.md`](README.md) (este arquivo).
-2. **Estado Atual e Tarefa:** [`10-chat-handoff.md`](10-chat-handoff.md) → [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) → [`05-git-and-branch-workflow.md`](05-git-and-branch-workflow.md).
+2. **Estado Atual, Fluxo Git e Tarefa:** [`10-chat-handoff.md`](10-chat-handoff.md) → [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) → [`05-git-and-branch-workflow.md`](05-git-and-branch-workflow.md) → [`11-atomic-commits-and-change-tracking.md`](11-atomic-commits-and-change-tracking.md).
 3. **Contexto e Arquitetura:** [`01-project-context.md`](01-project-context.md) → [`02-architecture.md`](02-architecture.md) → [`09-technical-decisions.md`](09-technical-decisions.md).
 4. **Execução e Validação:** [`03-security-baseline.md`](03-security-baseline.md) → [`04-coding-standards.md`](04-coding-standards.md) → [`07-dependency-management.md`](07-dependency-management.md) → [`06-testing-and-validation.md`](06-testing-and-validation.md).
 
@@ -76,6 +77,7 @@ A documentação deve ser mantida viva de forma **cirúrgica** (não edite todos
 | Novo controle de segurança implementado ou exigido | [`03-security-baseline.md`](03-security-baseline.md) e [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) |
 | Alteração em convenções de código, tipagem ou lint | [`04-coding-standards.md`](04-coding-standards.md) |
 | Criação, conclusão ou merge de branches do plano de ação | [`05-git-and-branch-workflow.md`](05-git-and-branch-workflow.md), [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) e [`10-chat-handoff.md`](10-chat-handoff.md) |
+| Alteração na política de commits, granularidade ou rastreabilidade Git | [`11-atomic-commits-and-change-tracking.md`](11-atomic-commits-and-change-tracking.md) e [`05-git-and-branch-workflow.md`](05-git-and-branch-workflow.md) |
 | Mudança nos scripts do `package.json` ou critérios de teste/CI | [`06-testing-and-validation.md`](06-testing-and-validation.md) |
 | Adição, remoção ou atualização de pacotes em `package.json` | [`01-project-context.md`](01-project-context.md), [`07-dependency-management.md`](07-dependency-management.md) e [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) |
 | Mudança de status de vulnerabilidade/bug (ex.: de `Identificado` para `Validado` ou `Integrado`) | [`08-security-findings-and-risks.md`](08-security-findings-and-risks.md) |
