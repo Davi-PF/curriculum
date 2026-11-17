@@ -93,6 +93,25 @@ export function SkillModal({
     };
   }, [hasSkill, closeDialogProgrammatically]);
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!hasSkill || !dialog) return;
+
+    // Registra o fechamento por backdrop diretamente no DOM para manter o JSX de
+    // `<dialog>` livre de `onClick` em elemento não-interativo (`typescript:S1082`),
+    // preservando o fechamento nativo via teclado (`Escape` / `onCancel`).
+    const handleBackdropClick = (event: MouseEvent) => {
+      if (event.target === dialog) {
+        requestClose();
+      }
+    };
+
+    dialog.addEventListener("click", handleBackdropClick);
+    return () => {
+      dialog.removeEventListener("click", handleBackdropClick);
+    };
+  }, [hasSkill, requestClose]);
+
   const handleCancel = (event: React.SyntheticEvent<HTMLDialogElement>) => {
     event.preventDefault();
     requestClose();
@@ -112,12 +131,6 @@ export function SkillModal({
     restoreFocus();
   };
 
-  const handleBackdropClick = (event: React.MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) {
-      requestClose();
-    }
-  };
-
   if (!skill) return null;
 
   return createPortal(
@@ -128,7 +141,6 @@ export function SkillModal({
       aria-describedby={descriptionId}
       onCancel={handleCancel}
       onClose={handleNativeClose}
-      onClick={handleBackdropClick}
       className={`
         m-auto w-[calc(100%-2rem)] max-w-lg p-0
         rounded-xl border-0

@@ -831,4 +831,116 @@ describe("SkillModal", () => {
       screen.getByRole("button", { name: "Fechar modal" }),
     );
   });
+
+  it("não registra listeners de clique duplicados no backdrop sob React StrictMode", () => {
+    const addListenerSpy = vi.spyOn(
+      HTMLDialogElement.prototype,
+      "addEventListener",
+    );
+    const removeListenerSpy = vi.spyOn(
+      HTMLDialogElement.prototype,
+      "removeEventListener",
+    );
+    const onClose = vi.fn();
+
+    render(
+      <StrictMode>
+        <LanguageProvider>
+          <SkillModal
+            skill={mockSkill}
+            isOpen={true}
+            isClosing={false}
+            onClose={onClose}
+          />
+        </LanguageProvider>
+      </StrictMode>,
+    );
+
+    const addedClickListeners = addListenerSpy.mock.calls.filter(
+      ([eventName]) => eventName === "click",
+    );
+    const removedClickListeners = removeListenerSpy.mock.calls.filter(
+      ([eventName]) => eventName === "click",
+    );
+    expect(addedClickListeners).toHaveLength(2);
+    expect(removedClickListeners).toHaveLength(1);
+    expect(removedClickListeners[0][1]).toBe(addedClickListeners[0][1]);
+
+    // Clique em conteúdo interno não fecha
+    fireEvent.click(screen.getByText("Biblioteca para interfaces"));
+    expect(onClose).not.toHaveBeenCalled();
+
+    // Clique diretamente no backdrop dispara onClose exatamente 1 vez
+    fireEvent.click(screen.getByRole("dialog"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    addListenerSpy.mockRestore();
+    removeListenerSpy.mockRestore();
+  });
+
+  it("remove o listener nativo de clique no backdrop ao desmontar o modal", () => {
+    const addListenerSpy = vi.spyOn(
+      HTMLDialogElement.prototype,
+      "addEventListener",
+    );
+    const removeListenerSpy = vi.spyOn(
+      HTMLDialogElement.prototype,
+      "removeEventListener",
+    );
+    const onClose = vi.fn();
+
+    const { unmount } = renderWithLanguage(
+      <SkillModal
+        skill={mockSkill}
+        isOpen={true}
+        isClosing={false}
+        onClose={onClose}
+      />,
+    );
+
+    const dialog = screen.getByRole("dialog") as HTMLDialogElement;
+    const clickCall = addListenerSpy.mock.calls.find(
+      ([eventName]) => eventName === "click",
+    );
+    expect(clickCall).toBeDefined();
+
+    unmount();
+
+    expect(removeListenerSpy).toHaveBeenCalledWith("click", clickCall![1]);
+
+    // Disparo residual direto no antigo nó dialog não aciona onClose
+    fireEvent.click(dialog);
+    expect(onClose).not.toHaveBeenCalled();
+
+    addListenerSpy.mockRestore();
+    removeListenerSpy.mockRestore();
+  });
+
+  it("mantém ações de botões internos e ignora clique em área interna sem fechar pelo backdrop", () => {
+    const onClose = vi.fn();
+    const internalAction = vi.fn();
+
+    renderWithLanguage(
+      <div>
+        <button type="button" onClick={internalAction}>
+          Ação externa
+        </button>
+        <SkillModal
+          skill={mockSkill}
+          isOpen={true}
+          isClosing={false}
+          onClose={onClose}
+        />
+      </div>,
+    );
+
+    // Clique no container interno do diálogo e no título não fecha o modal
+    fireEvent.click(screen.getByRole("heading", { name: "React" }));
+    expect(onClose).not.toHaveBeenCalled();
+
+    // Clique no botão interno de fechar continua disparando requestClose normalmente
+    fireEvent.click(screen.getByRole("button", { name: "Fechar modal" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(internalAction).not.toHaveBeenCalled();
+  });
 });
