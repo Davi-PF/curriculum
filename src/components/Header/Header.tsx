@@ -18,7 +18,7 @@ export default function Header() {
   `}
 >
 
-      <nav
+      <div
         className={`
       container mx-auto px-3 py-4
       transition-transform duration-300 origin-top
@@ -43,7 +43,7 @@ export default function Header() {
 
           <HeaderAvatar isScrolled={isScrolled} />
         </div>
-      </nav>
+      </div>
     </header>
   );
 }

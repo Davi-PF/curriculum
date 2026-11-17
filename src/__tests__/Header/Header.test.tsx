@@ -29,12 +29,14 @@ vi.mock('../../components/LanguageSwitcher', () => ({
 import { useHeaderScroll } from '../../components/Header/useHeaderScroll';
 
 describe('Header', () => {
-  it('renderiza o header com estado não scrollado', () => {
+  it('renderiza o header com estado não scrollado e sem landmark nav vazia', () => {
     vi.mocked(useHeaderScroll).mockReturnValue(false);
 
 
     render(<Header />);
 
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
     expect(screen.getByTestId('header-title')).toHaveTextContent('false');
     expect(screen.getByTestId('header-avatar')).toHaveTextContent('false');
     expect(screen.getByTestId('language-switcher')).toHaveTextContent('false');
@@ -46,6 +48,8 @@ describe('Header', () => {
 
     render(<Header />);
 
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
     expect(screen.getByTestId('header-title')).toHaveTextContent('true');
     expect(screen.getByTestId('header-avatar')).toHaveTextContent('true');
     expect(screen.getByTestId('language-switcher')).toHaveTextContent('true');
