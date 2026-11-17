@@ -178,6 +178,13 @@ test.describe("Auditoria E2E de Acessibilidade (Playwright + axe-core)", () => {
       const tab = tabs.nth(index);
       await tab.click();
 
+      const visiblePanels = page.getByRole("tabpanel");
+      await expect(visiblePanels).toHaveCount(1);
+      const immediateOpacity = await visiblePanels
+        .first()
+        .evaluate((el) => getComputedStyle(el).opacity);
+      expect(immediateOpacity).toBe("1");
+
       await expect(tab).toHaveAttribute("aria-selected", "true");
       await expect(tab).toHaveAttribute("tabindex", "0");
 
@@ -186,8 +193,6 @@ test.describe("Auditoria E2E de Acessibilidade (Playwright + axe-core)", () => {
       expect(tabId).toBeTruthy();
       expect(panelId).toBeTruthy();
 
-      const visiblePanels = page.getByRole("tabpanel");
-      await expect(visiblePanels).toHaveCount(1);
       await expect(visiblePanels.first()).toHaveAttribute("id", panelId!);
       await expect(visiblePanels.first()).toHaveAttribute(
         "aria-labelledby",
@@ -208,6 +213,20 @@ test.describe("Auditoria E2E de Acessibilidade (Playwright + axe-core)", () => {
 
       await runAxeAudit(page, testInfo, `experience-tab-${index}`);
     }
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await tabs.nth(1).click();
+    const reducedMotionPanel = page.getByRole("tabpanel").first();
+    const reducedStyles = await reducedMotionPanel.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        opacity: style.opacity,
+        animationName: style.animationName,
+      };
+    });
+    expect(reducedStyles.opacity).toBe("1");
+    expect(reducedStyles.animationName).toBe("none");
+    await runAxeAudit(page, testInfo, "experience-tab-1-reduced-motion");
   });
 
   test.describe("Cenário E — Auditoria responsiva Mobile e Desktop", () => {

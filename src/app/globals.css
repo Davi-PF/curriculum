@@ -69,6 +69,27 @@ body::before {
   animation: fade-in 300ms ease-out;
 }
 
+@keyframes panel-enter {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-panel-enter {
+  will-change: transform;
+  animation: panel-enter 250ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-panel-enter {
+    animation: none;
+    transform: none;
+  }
+}
+
 .header-nav-anim {
   will-change: transform;
 }

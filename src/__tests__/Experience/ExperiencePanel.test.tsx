@@ -149,4 +149,28 @@ describe("ExperiencePanel", () => {
     expect(panel).toHaveAttribute("aria-labelledby", "exp-tab-0");
     expect(panel).toHaveAttribute("tabindex", "0");
   });
+
+  it("mounts without opacity fade animation to preserve contrast immediately on tab switch", () => {
+    const experience: ExperienceItem = {
+      id: "5",
+      logo: "/w.png",
+      company: "Epsilon",
+      title: "Frontend Engineer",
+      period: "2025",
+      description: "Acessibilidade contínua.",
+      activities: [],
+    };
+
+    render(
+      <ExperiencePanel
+        experience={experience}
+        id="exp-panel-1"
+        labelledBy="exp-tab-1"
+      />,
+    );
+
+    const panel = screen.getByRole("tabpanel");
+    expect(panel.className).toContain("animate-panel-enter");
+    expect(panel.className).not.toContain("animate-fade-in");
+  });
 });
