@@ -21,7 +21,7 @@ export default function Contact() {
         </div>
 
         <div>
-          <p className="text-justify sm:text-center text-emerald-500 sm:text-lg">
+          <p className="text-justify sm:text-center text-emerald-400 sm:text-lg">
             {t.contact.description}
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function Contact() {
                 <strong>{t.contact.Email}</strong> daviprufer@gmail.com
               </>
             }
-            ariaLabel={t.contact.ariaLabelCopyEmail}
+            ariaLabel={`${t.contact.ariaLabelCopyEmail}: ${t.contact.Email} daviprufer@gmail.com`}
             isCopied={copiedField === "email"}
             onClick={() => copyToClipboard("daviprufer@gmail.com", "email")}
           />
@@ -46,7 +46,7 @@ export default function Contact() {
                 <strong>{t.contact.Phone}</strong> (47) 99958-5464
               </>
             }
-            ariaLabel={t.contact.ariaLabelCopyPhone}
+            ariaLabel={`${t.contact.ariaLabelCopyPhone}: ${t.contact.Phone} (47) 99958-5464`}
             isCopied={copiedField === "phone"}
             onClick={() => copyToClipboard("47999585464", "phone")}
           />

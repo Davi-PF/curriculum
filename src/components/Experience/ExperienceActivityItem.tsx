@@ -52,13 +52,13 @@ function ActivityLinkAnchor({
 const styles = {
   experience: {
     title: "text-sm",
-    description: "text-xs text-emerald-400/70",
+    description: "text-xs text-emerald-300/90",
     showDescription: true,
     descriptionClass: ""
   },
   project: {
     title: "text-sm",
-    description: "text-xs text-emerald-400/60",
+    description: "text-xs text-emerald-300/90",
     showDescription: true,
     descriptionClass: "hidden sm:block",
   },

@@ -68,4 +68,25 @@ describe('ContactItem', () => {
     const link = screen.getByRole('link');
     expect(link.querySelector('svg')).not.toBeInTheDocument();
   });
+
+  it('preserves accessible name alignment with visible label when ariaLabel includes visible text', () => {
+    render(
+      <ContactItem
+        icon="/icon.png"
+        label={
+          <>
+            <strong>Email:</strong> contato@exemplo.dev
+          </>
+        }
+        ariaLabel="Copiar email: Email: contato@exemplo.dev"
+        onClick={() => {}}
+      />
+    );
+
+    const button = screen.getByRole('button', {
+      name: 'Copiar email: Email: contato@exemplo.dev',
+    });
+    expect(button).toHaveAttribute('type', 'button');
+    expect(button).toHaveTextContent('Email: contato@exemplo.dev');
+  });
 });

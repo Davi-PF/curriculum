@@ -44,4 +44,16 @@ describe("CurriculumDriveAccess", () => {
     expect(link.className).toContain("mt-3");
     expect(link.className).toContain("scale-90");
   });
+
+  it("mantém classes de contraste acessível no estado normal e hover", () => {
+    render(<CurriculumDriveAccess href="https://example.com/cv" />);
+
+    const link = screen.getByRole("link", { name: "Currículo em PDF" });
+    const label = screen.getByText("Currículo em PDF");
+
+    expect(link.className).toContain("bg-stone-200/20");
+    expect(link.className).toContain("hover:bg-stone-700/60");
+    expect(link.className).not.toContain("hover:bg-stone-400/50");
+    expect(label.className).toContain("text-emerald-300");
+  });
 });

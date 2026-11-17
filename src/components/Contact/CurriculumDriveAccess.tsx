@@ -19,12 +19,12 @@ export default function CurriculumDriveAccess({ href, className = "" }: Props) {
         inset-ring-1 inset-ring-stone-600
         rounded-full shadow-lg
         relative
-        hover:bg-stone-400/50
+        hover:bg-stone-700/60
         transition-colors
         ${className}
       `}
     >
-      <span className="block px-5 py-2 text-lg font-semibold text-emerald-400 text-center">
+      <span className="block px-5 py-2 text-lg font-semibold text-emerald-300 text-center">
         {t.contact.curriculumText}
       </span>
     </a>
